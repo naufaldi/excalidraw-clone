@@ -1,1035 +1,616 @@
 # Real-Time Collaborative Whiteboard
-## Product Roadmap & Engineering Guide
+## Product Requirements Document (PRD) - Offline-First Evolution
 
 ---
 
 ## Product Vision
 
-**Problem**: Teams struggle to collaborate visually on diagrams, flowcharts, and whiteboards remotely. Existing tools are either too simple (basic drawing apps) or too complex (enterprise software with steep learning curves).
+**Problem**: Teams struggle to collaborate visually on diagrams, flowcharts, and whiteboards remotely. Most tools require accounts, need internet, or lose work when offline. Users want to draw ideas instantly, anywhere, anytime.
 
-**Solution**: A real-time collaborative whiteboard that feels as natural as drawing on paper, with the power of modern collaboration features.
+**Solution**: An offline-first collaborative whiteboard that works flawlessly without internet, then syncs to the cloud when available. Start drawing immediately, create an account later to sync across devices.
 
-**Target Users**: Software teams, designers, product managers, educators, and anyone who needs to visualize ideas collaboratively.
+**Evolution Strategy**:
+- **V1**: Zero-barrier drawing (offline-first)
+- **V2**: Add cloud sync (register when ready)
+- **V3**: Multi-board organization
+- **V4**: Real-time collaboration
+
+**Target Users**: Software teams, designers, product managers, educators, students, and anyone who needs to visualize ideas quickly without friction.
 
 ---
 
 ## Core Value Propositions
 
-1. **Instant Collaboration** - See changes in real-time, no manual syncing
-2. **Intuitive Drawing** - Tools that feel natural and responsive
-3. **Persistent Workspace** - Never lose your work, access from anywhere
-4. **Multi-format Export** - Share your work in PNG, SVG, PDF formats
-5. **Version History** - Track changes and restore previous versions
+1. **Zero Friction** - Open app → draw immediately (no registration required)
+2. **Always Works** - Full functionality offline, auto-syncs when online
+3. **Natural Drawing** - Tools that feel responsive and intuitive
+4. **Never Lose Work** - Auto-saves locally, syncs to cloud when connected
+5. **Multi-Format Export** - Share as PNG, SVG, PDF even offline
+6. **Cross-Device Access** - Cloud sync (V2+) for seamless multi-device workflow
 
 ---
 
 ## User Personas
 
 ### Primary Persona: Software Team Lead
-- **Goals**: Quickly sketch architecture diagrams, facilitate team discussions
-- **Pain Points**: Current tools are clunky, hard to use during meetings
-- **Success Metric**: Can create and share diagrams in <2 minutes
+- **Goals**: Sketch architecture diagrams during meetings, facilitate brainstorming sessions
+- **Pain Points**: Meeting rooms have unreliable WiFi, tools require account creation
+- **Success Metric**: Can open app → draw diagram → export/share within 2 minutes
+- **V1 Use Case**: "Meeting just started, WiFi is spotty, need to sketch architecture now"
 
 ### Secondary Persona: Product Designer
-- **Goals**: Create wireframes and mockups collaboratively
-- **Pain Points**: Need version control for design iterations
-- **Success Metric**: Can collaborate with 3+ team members simultaneously
+- **Goals**: Create wireframes and mockups iteratively
+- **Pain Points**: Tools require accounts, work lost when offline
+- **Success Metric**: Can work on plane/train (no internet), sync later at home
+- **V1 Use Case**: "On commute, brainstorming ideas, no WiFi but need to sketch"
 
-### Tertiary Persona: Educator
-- **Goals**: Teach concepts visually, engage students
-- **Pain Points**: Hard to share whiteboard after class
-- **Success Metric**: Can export and distribute whiteboard content
+### Tertiary Persona: Educator/Student
+- **Goals**: Teach concepts visually, create diagrams for presentations
+- **Pain Points**: Students can't afford premium tools, school WiFi unreliable
+- **Success Metric**: Can use app completely free, works during class
+- **V1 Use Case**: "Teaching class, internet is down, still need to draw diagrams"
 
 ---
 
-## Milestone-Based Development Plan
+## Product Evolution Roadmap
 
-## 🏁 Milestone 1: Single-User Whiteboard
-**Duration**: 1 week  
-**Goal**: Create a simple, intuitive drawing tool for individual use
+## 🏁 Milestone 1: V1 - Offline-First Single Board (2 weeks)
+**Duration**: 2 weeks  
+**Goal**: Zero-friction drawing tool that works completely offline
 
 ### Product Goals
-- Enable users to quickly capture and organize visual ideas
-- Provide familiar drawing tools that feel natural
-- Ensure work is never lost (local persistence)
+- Enable instant drawing with zero barriers (no registration, no login)
+- Provide comprehensive drawing tools for all use cases
+- Ensure work is never lost (local persistence with IndexedDB)
+- Enable sharing even without internet (export functionality)
 
 ### User Stories
 
-**As a** user,  
-**I want to** draw on a blank canvas with various tools,  
-**So that** I can quickly sketch my ideas
+**As a** meeting attendee with unreliable WiFi,  
+**I want to** open the app and start drawing immediately,  
+**So that** I can capture ideas during the meeting without connectivity issues
 
 **Acceptance Criteria**:
-- [ ] User can select from 5 drawing tools (pen, rectangle, circle, text, eraser)
+- [ ] App opens directly to drawing canvas (no splash screen, no login)
+- [ ] User can draw within 3 seconds of opening the app
+- [ ] All 8 drawing tools work flawlessly offline (pen, rectangle, circle, line, arrow, text, selection, eraser)
 - [ ] Drawing is responsive and smooth (60fps)
-- [ ] User can change colors and stroke width
-- [ ] User can undo/redo at least 20 operations
-- [ ] All work is automatically saved and persists on page refresh
+- [ ] Auto-save indicator shows local save status
+- [ ] App works 100% without internet connection
 
-**As a** user,  
-**I want to** see my previous drawings when I return,  
-**So that** I don't lose my work
+**As a** commuter with no internet,  
+**I want to** create detailed diagrams on my laptop/tablet,  
+**So that** I can be productive during travel time
 
 **Acceptance Criteria**:
-- [ ] Canvas automatically loads previous drawing on page load
-- [ ] Auto-save indicator shows when work is saved
-- [ ] Data persists even after browser restart
+- [ ] Undo/redo supports 50+ operations
+- [ ] User can change colors, stroke width, fill styles
+- [ ] All changes auto-save to local storage (IndexedDB)
+- [ ] Data persists across browser restarts and device reboots
+- [ ] Can handle 1000+ drawing elements without performance degradation
 
-### User Flow
+**As a** user who wants to share my work,  
+**I want to** export my whiteboard even without internet,  
+**So that** I can share my ideas via email, messaging, or presentation
+
+**Acceptance Criteria**:
+- [ ] Export to PNG (high-resolution)
+- [ ] Export to SVG (vector format)
+- [ ] Export to PDF (printable format)
+- [ ] Export maintains all colors, text, and styling
+- [ ] Export works without internet connection
+- [ ] Exports are downloadable immediately
+
+**As a** user who returns to my work,  
+**I want to** see exactly where I left off,  
+**So that** I can continue seamlessly
+
+**Acceptance Criteria**:
+- [ ] Canvas loads previous drawing automatically on app open
+- [ ] User can see timestamp of last save
+- [ ] Multi-tab support: changes sync across browser tabs
+- [ ] No data loss scenarios (graceful handling of crashes)
+
+### User Flow - V1 Offline Experience
 
 ```
-User opens app
+User opens app (no internet)
     ↓
-User sees blank canvas with toolbar
+App loads instantly to blank canvas
     ↓
-User selects drawing tool (pen/rectangle/circle/text/eraser)
+User selects drawing tool → draws immediately
     ↓
-User draws on canvas
+Auto-save indicator shows "Saved locally"
     ↓
-[Repeat: select tool → draw] as needed
+User continues drawing (work auto-saves every 2 seconds)
     ↓
-User makes mistake → clicks undo
+User exports to PNG/SVG/PDF (works offline!)
     ↓
-User changes color/stroke width
+User closes app
     ↓
-User refreshes page → drawing persists
+[Later] User reopens app
+    ↓
+Sees previous work exactly as left
 ```
 
-### High-Level Architecture
+### V1 Key Features
 
-```
-Frontend-Only Architecture
+**Drawing Tools**:
+- Pen (freehand with smoothing)
+- Rectangle, Circle, Square
+- Line, Arrow (with customizable heads)
+- Text (with font options)
+- Selection (single, multi-select, lasso)
+- Eraser
 
-┌─────────────────────────┐
-│   React Application     │
-│  ┌───────────────────┐  │
-│  │   Canvas Component│  │ ← HTML5 Canvas for drawing
-│  │   - Event Handlers│  │ ← Mouse/touch events
-│  │   - Drawing Logic │  │ ← Tool-specific rendering
-│  └───────────────────┘  │
-│  ┌───────────────────┐  │
-│  │ State Management  │  │ ← React Context + useState
-│  │ - Elements Array  │  │ ← All drawn elements
-│  │ - Current Tool    │  │ ← Active drawing tool
-│  │ - Undo/Redo Stack │  │ ← History management
-│  └───────────────────┘  │
-│  ┌───────────────────┐  │
-│  │  localStorage     │  │ ← Browser persistence
-│  │  - Auto-save      │  │ ← Every 2 seconds
-│  │  - Load on start  │  │ ← Restore previous work
-│  └───────────────────┘  │
-└─────────────────────────┘
-```
+**Canvas Features**:
+- Zoom in/out (pinch/scroll)
+- Pan (spacebar + drag)
+- Grid toggle (optional snap-to-grid)
+- Infinite canvas (unbounded drawing area)
 
-### Core Algorithms
+**Persistence**:
+- IndexedDB for robust local storage
+- Auto-save every 2 seconds (debounced)
+- Versioned saves (can recover from crashes)
+- Multi-tab synchronization via BroadcastChannel
 
-**1. Drawing Algorithm**
-- **Purpose**: Convert mouse movements into smooth visual elements
-- **Approach**:
-  - Track mouse position on mousedown
-  - Sample mouse position at regular intervals during mousemove
-  - Store points in array
-  - Draw smooth curves using bezier interpolation
-  - Redraw entire canvas on every change (simple but effective for single user)
+**Export**:
+- PNG export (1x, 2x, 4x resolution)
+- SVG export (vector, editable)
+- PDF export (print-ready)
+- Copy to clipboard (PNG)
 
-**2. Undo/Redo Algorithm**
-- **Purpose**: Allow users to reverse or restore changes
-- **Approach**:
-  - Maintain two stacks: undoStack and redoStack
-  - On each operation, push previous state to undoStack
-  - Clear redoStack on new operation
-  - Undo: pop from undoStack, push current to redoStack
-  - Redo: pop from redoStack, push current to undoStack
-
-### Success Metrics
-- Time to first drawing: <10 seconds
-- Drawing smoothness: 60fps (16ms per frame)
-- Undo/redo responsiveness: <100ms
-- Data persistence: 100% (no data loss)
+### Success Metrics - V1
+- Time to first drawing: <3 seconds (no barriers)
+- Drawing performance: 60fps with 100+ elements
+- Data durability: 100% (no data loss in any scenario)
+- Offline capability: 100% functional without internet
+- Export quality: High-resolution, maintains fidelity
 
 ---
 
-## 🚀 Milestone 2: Multi-User Real-Time Collaboration
-**Duration**: 1.5 weeks  
-**Goal**: Enable multiple users to draw on the same whiteboard simultaneously
+## 🚀 Milestone 2: V2 - Cloud Sync & Authentication (2 weeks)
+**Duration**: 2 weeks  
+**Goal**: Add cloud storage and user accounts for cross-device access
 
 ### Product Goals
-- Enable distributed teams to collaborate as if they're in the same room
-- Provide visual presence indicators (cursors, tool selections)
-- Maintain real-time synchronization with minimal latency
+- Enable users to create accounts when ready (not required)
+- Sync local work to cloud for cross-device access
+- Maintain offline-first functionality (works without internet)
+- Provide seamless migration from V1 to V2
 
 ### User Stories
 
-**As a** team member,  
-**I want to** see my colleague's cursor and drawing in real-time,  
-**So that** I know what they're working on
+**As a** V1 user who wants cloud sync,  
+**I want to** create an account and sync my local boards,  
+**So that** I can access my work from any device
 
 **Acceptance Criteria**:
-- [ ] User can see other users' cursors moving in real-time (<100ms latency)
-- [ ] Each user has a unique color for their cursor and drawings
-- [ ] User list shows all active collaborators
-- [ ] Drawings appear instantly for all users
+- [ ] Optional registration/login (V1 users can keep using offline)
+- [ ] Migration modal: "Sign up to sync your local boards to cloud"
+- [ ] One-click import of all V1 local boards to cloud
+- [ ] New boards auto-sync when logged in
+- [ ] Works offline: changes sync when connection restored
+- [ ] Visual sync status indicator (online/offline/syncing)
+
+**As a** user working across devices,  
+**I want to** start drawing on desktop and continue on mobile,  
+**So that** I can work from anywhere
+
+**Acceptance Criteria**:
+- [ ] Login on any device → see all synced boards
+- [ ] Real-time sync when online (changes appear in <5 seconds)
+- [ ] Offline mode: changes queue and sync when reconnected
+- [ ] No conflicts: last-writer-wins with visual notification
+- [ ] Board list shows last modified timestamp
+
+**As a** privacy-conscious user,  
+**I want to** control what syncs to the cloud,  
+**So that** I can keep some boards local-only
+
+**Acceptance Criteria**:
+- [ ] Per-board sync toggle (sync to cloud / local only)
+- [ ] Clear indication of which boards are cloud-synced
+- [ ] Can convert local board to synced (and vice versa)
+- [ ] Export before making board local-only
+
+### V2 Architecture Evolution
+
+```
+V1 → V2 Migration
+┌─────────────────────────────────────────┐
+│  V1 User: 5 boards stored locally       │
+│  ↓                                       │
+│  Sees "Register to sync" prompt         │
+│  ↓                                       │
+│  Creates account (email + password)     │
+│  ↓                                       │
+│  All local boards upload to cloud       │
+│  ↓                                       │
+│  Now has:                               │
+│  - Local backup (IndexedDB)             │
+│  - Cloud sync (PostgreSQL)              │
+│  - Cross-device access                  │
+└─────────────────────────────────────────┘
+```
+
+### V2 New Features
+
+**Authentication**:
+- Email + password registration
+- Login/logout functionality
+- Password reset via email
+- Optional: Google/GitHub OAuth
+
+**Cloud Sync**:
+- Automatic background sync when online
+- Manual sync trigger button
+- Conflict resolution UI
+- Sync status indicators
+
+**Dashboard**:
+- List of all user's boards (cloud + local)
+- Board thumbnails/previews
+- Search boards by name
+- Recently accessed boards
+
+### Success Metrics - V2
+- V1 → V2 migration success rate: >90%
+- Sync latency when online: <5 seconds
+- Conflict resolution: Works without data loss
+- Offline functionality: 100% maintained
+
+---
+
+## 📄 Milestone 3: V3 - Multi-Board Management (1 week)
+**Duration**: 1 week  
+**Goal**: Enable users to create and manage multiple boards
+
+### Product Goals
+- Remove single-board limitation from V2
+- Provide intuitive board organization
+- Enable templates for faster creation
+- Maintain offline-first functionality
+
+### User Stories
+
+**As a** user with multiple projects,  
+**I want to** create separate boards for each project,  
+**So that** I can organize my work by context
+
+**Acceptance Criteria**:
+- [ ] Dashboard shows all user boards (unlimited quantity)
+- [ ] Create new board button (prompts for name)
+- [ ] Board thumbnails with preview images
+- [ ] Delete board (with confirmation)
+- [ ] Rename board (inline editing)
+- [ ] Duplicate board
+
+**As a** user working on flowcharts,  
+**I want to** start with a template,  
+**So that** I can create professional diagrams faster
+
+**Acceptance Criteria**:
+- [ ] Template gallery: Flowchart, Mind Map, UML, Wireframe
+- [ ] Each template includes starter shapes and connections
+- [ ] Templates customizable (colors, labels, layout)
+- [ ] "Blank board" option still available
+
+**As a** user with many boards,  
+**I want to** quickly find the board I'm looking for,  
+**So that** I don't waste time searching
+
+**Acceptance Criteria**:
+- [ ] Search boards by name (real-time)
+- [ ] Sort by: Recently Modified, Name, Created Date
+- [ ] Filter by: Templates used, Board type
+- [ ] "Recent Boards" section (last 5 accessed)
+
+### V3 Dashboard UI Evolution
+
+```
+V2 Dashboard (Single Board):
+┌─────────────────────────────────────────┐
+│  [My Board]                             │
+│  ████████████████████                   │
+│                                         │
+│  [Create New Board]                     │
+└─────────────────────────────────────────┘
+
+V3 Dashboard (Multiple Boards):
+┌─────────────────────────────────────────┐
+│  📋 All My Boards (12)                  │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │Proj A│ │Proj B│ │Flow 1│           │
+│  │🖼️    │ │🖼️    │ │🖼️    │           │
+│  └──────┘ └──────┘ └──────┘           │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │UML   │ │Mind  │ │Blank │           │
+│  │🖼️    │ │🖼️    │ │🖼️    │           │
+│  └──────┘ └──────┘ └──────┘           │
+│                                         │
+│  [+ Create New Board]                   │
+│  [📁 Browse Templates]                  │
+└─────────────────────────────────────────┘
+```
+
+### V3 Database Schema Evolution
+
+```sql
+-- V2: Single board per user
+-- V3: Unlimited boards per user
+
+CREATE TABLE boards (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    template_type VARCHAR(50), -- 'blank', 'flowchart', 'mindmap', etc.
+    thumbnail_url VARCHAR(255),
+    is_synced BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### Success Metrics - V3
+- Board creation time: <3 seconds
+- Dashboard load time: <2 seconds
+- Template usage rate: >40% of new boards
+- Search response time: <200ms
+
+---
+
+## 👥 Milestone 4: V4 - Real-Time Collaboration (2 weeks)
+**Duration**: 2 weeks  
+**Goal**: Enable multiple users to edit boards simultaneously
+
+### Product Goals
+- Add real-time multi-user editing
+- Provide presence indicators
+- Handle conflicts gracefully
+- Maintain offline capability (view-only when offline)
+
+### User Stories
 
 **As a** team lead,  
-**I want to** invite multiple team members to a whiteboard session,  
-**So that** we can brainstorm together remotely
+**I want to** invite team members to edit a board,  
+**So that** we can brainstorm together in real-time
 
 **Acceptance Criteria**:
-- [ ] Users can share a board URL with others
-- [ ] New users joining see the current state of the board
-- [ ] Users can disconnect and reconnect without losing changes
-- [ ] Board persists even when all users leave
+- [ ] Share board via link (view or edit permission)
+- [ ] User list shows who's currently online
+- [ ] Multiple users can edit simultaneously
+- [ ] Changes appear in real-time (<100ms latency)
 
-### User Flow
-
-```
-User A opens existing board
-    ↓
-User A draws some elements
-    ↓
-User A shares board URL with User B
-    ↓
-User B opens board URL
-    ↓
-User B sees User A's existing drawings
-    ↓
-User B starts drawing
-    ↓
-[Both users see each other's changes in real-time]
-    ↓
-User C joins via shared URL
-    ↓
-User C sees all previous drawings
-    ↓
-All three users draw simultaneously
-    ↓
-Users disconnect at will
-    ↓
-Board state is preserved for next session
-```
-
-### High-Level Architecture
-
-```
-Real-Time Collaboration Architecture
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Client Layer                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
-│  │   User A     │  │   User B     │  │   User C     │       │
-│  │ WebSocket    │  │ WebSocket    │  │ WebSocket    │       │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘       │
-└─────────┼──────────────────┼──────────────────┼─────────────┘
-          │                  │                  │
-          └──────────────────┼──────────────────┘
-                             │
-          ┌──────────────────▼──────────────────┐
-          │         Golang Backend              │
-          │  ┌────────────────────────────────┐ │
-          │  │    WebSocket Hub               │ │
-          │  │  - Connection Management       │ │
-          │  │  - Message Broadcasting        │ │
-          │  │  - Room/Board Isolation        │ │
-          │  └────────────┬───────────────────┘ │
-          │               │                       │
-          │  ┌────────────▼───────────────────┐ │
-          │  │     In-Memory State            │ │
-          │  │  - Active Connections          │ │
-          │  │  - Board State Cache           │ │
-          │  │  - User Presence Map           │ │
-          │  └────────────┬───────────────────┘ │
-          └───────────────┼───────────────────────┘
-                          │
-                    ┌─────▼─────┐
-                    │  Redis    │
-                    │ (Optional)│
-                    │  - Scaling│
-                    │  - Caching│
-                    └───────────┘
-```
-
-### Core Algorithms
-
-**1. Real-Time Synchronization Algorithm**
-- **Purpose**: Keep all clients in sync with minimal latency
-- **Approach**:
-  - Each drawing operation is a "command" sent immediately via WebSocket
-  - Server validates and broadcasts command to all users in board
-  - Clients apply command to local state immediately (optimistic updates)
-  - If conflict detected, server resolves using last-writer-wins with user notification
-
-**2. Conflict Resolution Algorithm**
-- **Purpose**: Handle simultaneous edits gracefully
-- **Approach**:
-  - Elements numbers
-  - Server checks version before accepting update have version
-  - If stale, reject and request fresh state from client
-  - For critical conflicts, show merge dialog to user
-  - Non-critical conflicts (different elements) resolve automatically
-
-**3. Presence Tracking Algorithm**
-- **Purpose**: Show who's online and what they're doing
-- **Approach**:
-  - Send cursor position every 50ms (throttled)
-  - Send tool change events immediately
-  - Remove inactive users after 30 seconds of no heartbeat
-  - Color-code all presence indicators by user
-
-### Success Metrics
-- **Latency**: <100ms end-to-end for drawing operations
-- **Scalability**: Support 10+ simultaneous users per board
-- **Reliability**: <1% message loss
-- **Presence**: Accurate user list with <5 second delay
-
----
-
-## 🔐 Milestone 3: User Authentication & Security
-**Duration**: 1 week  
-**Goal**: Secure user accounts with proper access control
-
-### Product Goals
-- Protect user data and whiteboards
-- Enable personalized experience (saved boards, preferences)
-- Control access to boards (owner, editor, viewer permissions)
-
-### User Stories
-
-**As a** new user,  
-**I want to** create an account with email and password,  
-**So that** I can save and access my whiteboards securely
+**As a** collaborator,  
+**I want to** see where others are working,  
+**So that** I can avoid editing the same area
 
 **Acceptance Criteria**:
-- [ ] User can register with email, password, and name
-- [ ] Password is hashed and never stored in plain text
-- [ ] User receives confirmation of successful registration
-- [ ] User is automatically logged in after registration
-
-**As a** registered user,  
-**I want to** log in and access my whiteboards,  
-**So that** I can continue my work across devices
-
-**Acceptance Criteria**:
-- [ ] User can log in with email/password
-- [ ] User receives a secure token for authentication
-- [ ] User can access only their own boards
-- [ ] Session persists across browser restarts
+- [ ] Live cursors showing each user's position
+- [ ] Cursor colors match user colors
+- [ ] Show which tool each user is using
+- [ ] User avatars in corner showing active editors
 
 **As a** board owner,  
 **I want to** control who can edit my boards,  
-**So that** I can collaborate safely
+**So that** I can manage collaboration safely
 
 **Acceptance Criteria**:
-- [ ] Owner can add collaborators by email
-- [ ] Owner can set permission levels (viewer/editor)
-- [ ] Unauthorized users cannot access private boards
-- [ ] Board access is revoked when collaborators removed
+- [ ] Permission levels: Owner, Editor, Viewer
+- [ ] Invite by email address
+- [ ] Remove collaborators
+- [ ] View-only mode for sensitive boards
 
-### User Flow
-
-```
-New User Registration
-┌─────────────────┐
-│ Visit Sign-up   │
-│ Page            │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Enter Email,    │
-│ Password, Name  │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Validate & Hash │
-│ Password        │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Create User     │
-│ in Database     │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Generate JWT    │
-│ Token           │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Logged In &     │
-│ Redirected to   │
-│ Dashboard       │
-└─────────────────┘
-
-Existing User Login
-┌─────────────────┐
-│ Visit Login     │
-│ Page            │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Enter Email &   │
-│ Password        │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Verify          │
-│ Credentials     │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Generate JWT    │
-│ Token           │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Authenticated   │
-│ & Redirected    │
-└─────────────────┘
-```
-
-### High-Level Architecture
+### V4 Technical Architecture
 
 ```
-Authentication & Authorization Architecture
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Client Layer                             │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Authentication Context                                │ │
-│  │  - Current User State                                  │ │
-│  │  - JWT Token Management                                │ │
-│  │  - Login/Logout Actions                                │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-└────────────────────────┼─────────────────────────────────────┘
-                         │ HTTP Requests with JWT
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    API Gateway                              │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  JWT Middleware                                        │ │
-│  │  - Extract token from header                           │ │
-│  │  - Verify signature                                    │ │
-│  │  - Extract user claims                                 │ │
-│  │  - Set user context                                    │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-└────────────────────────┼─────────────────────────────────────┘
-                         │
-            ┌────────────┴────────────┐
-            ▼                         ▼
-┌─────────────────────┐   ┌─────────────────────┐
-│   Public Routes     │   │  Protected Routes   │
-│  - /auth/register   │   │  - /boards/*        │
-│  - /auth/login      │   │  - /ws/*            │
-│  - /health          │   │                     │
-└─────────────────────┘   └─────────────────────┘
-                                        │
-                                        ▼
-                               ┌─────────────────────┐
-                               │  Permission Check   │
-                               │  - Verify ownership │
-                               │  - Check role       │
-                               └─────────────────────┘
-                                        │
-                                        ▼
-                               ┌─────────────────────┐
-                               │   Business Logic    │
-                               │   & Data Access     │
-                               └─────────────────────┘
+V4 Real-Time Collaboration
+┌─────────────────────────────────────────┐
+│  Multiple Clients                       │
+│  ┌────────┐ ┌────────┐ ┌────────┐       │
+│  │User A  │ │User B  │ │User C  │       │
+│  │🖱️     │ │🖱️     │ │🖱️     │       │
+│  └────┬───┘ └────┬───┘ └────┬───┘       │
+└───────┼──────────┼──────────┼───────────┘
+        │          │          │
+        └──────────┼──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │  WebSocket Server   │
+        │  (Golang)           │
+        └──────────┬──────────┘
+                   │
+        ┌──────────▼──────────┐
+        │   PostgreSQL DB     │
+        │   (boards, users)   │
+        └─────────────────────┘
 ```
 
-### Core Algorithms
+### V4 New Features
 
-**1. JWT Authentication Algorithm**
-- **Purpose**: Secure, stateless authentication
-- **Approach**:
-  - On login, server validates credentials
-  - Server generates JWT with user ID and expiration
-  - Client stores token and sends in Authorization header
-  - Server verifies token signature on each request
-  - Token auto-expires (24 hours) for security
+**Real-Time Sync**:
+- WebSocket server for instant updates
+- Operational transformation for conflict resolution
+- Offline queue (sync when reconnected)
 
-**2. Password Security Algorithm**
-- **Purpose**: Secure password storage
-- **Approach**:
-  - Use bcrypt with cost factor 12 (industry standard)
-  - Never store plain text passwords
-  - Never log passwords or tokens
-  - Rate-limit login attempts (5 per minute per IP)
+**Presence**:
+- Live cursor tracking
+- User color assignment
+- Tool indicator (pen, rectangle, etc.)
+- Online user list
 
-**3. Access Control Algorithm**
-- **Purpose**: Enforce board permissions
-- **Approach**:
-  - Every board has owner (full access)
-  - Owner can invite collaborators with roles
-  - Viewer: read-only access to board
-  - Editor: full edit access to board
-  - Server checks permissions on every API call
+**Collaboration**:
+- Share via link (copy to clipboard)
+- Permission management
+- Comment threads (optional)
+- Version history (who changed what)
 
-### Success Metrics
-- Registration success rate: >95%
-- Login success rate: >98%
-- Unauthorized access attempts blocked: 100%
-- Password security: bcrypt cost factor 12
-- Session security: JWT expires in 24 hours
-
----
-
-## 💾 Milestone 4: Database Persistence
-**Duration**: 1 week  
-**Goal**: Reliable, scalable data storage for all whiteboards
-
-### Product Goals
-- Never lose user data
-- Enable fast loading of whiteboards
-- Support growing user base
-- Enable board sharing and collaboration
-
-### User Stories
-
-**As a** user,  
-**I want to** access my whiteboards from any device,  
-**So that** I can work seamlessly across desktop and mobile
-
-**Acceptance Criteria**:
-- [ ] Whiteboards are automatically saved to database
-- [ ] Board loads instantly (<2 seconds) on any device
-- [ ] No data loss even if browser crashes
-- [ ] Offline changes sync when connection restored
-
-**As a** team,  
-**I want to** create and share boards easily,  
-**So that** we can organize our work
-
-**Acceptance Criteria**:
-- [ ] User can create new boards from dashboard
-- [ ] User can see list of all their boards
-- [ ] User can delete boards they own
-- [ ] Board creation is instant
-
-### User Flow
-
-```
-Dashboard - Board Management
-┌─────────────────┐
-│ User logs in    │
-│ & sees          │
-│ dashboard       │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Dashboard shows │
-│ user's boards   │
-└───────┬─────────┘
-        │
-        ├─────────────────────┐
-        ▼                     ▼
-┌─────────────┐        ┌─────────────┐
-│ Click       │        │ Click       │
-│ "Create     │        │ existing    │
-│ New Board"  │        │ board       │
-└───────┬─────┘        └─────┬───────┘
-        │                      │
-        ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐
-│ Prompt for      │    │ Load board from │
-│ board name      │    │ database        │
-└───────┬─────────┘    └─────┬───────────┘
-        │                      │
-        ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐
-│ Create board    │    │ Redirect to     │
-│ record in DB    │    │ whiteboard      │
-└───────┬─────────┘    └─────────────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Redirect to     │
-│ new whiteboard  │
-└─────────────────┘
-```
-
-### High-Level Architecture
-
-```
-Database Persistence Architecture
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                        │
-│                                                             │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Board Service Layer                                   │ │
-│  │  - Create Board                                        │ │
-│  │  - Get Board by ID                                     │ │
-│  │  - Save Element                                        │ │
-│  │  - Delete Board                                        │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-└────────────────────────┼─────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Access Layer                        │
-│                                                             │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Repository Pattern                                    │ │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │ │
-│  │  │ User Repo    │  │ Board Repo   │  │ Element Repo │  │ │
-│  │  │ - CRUD User  │  │ - CRUD Board │  │ - CRUD Elem  │  │ │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘  │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-└────────────────────────┼─────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Database Layer                           │
-│                                                             │
-│  ┌──────────────────────┐  ┌──────────────────────────────┐ │
-│  │   PostgreSQL         │  │   Redis (Optional)           │ │
-│  │                       │  │                              │ │
-│  │  Tables:              │  │  Caching:                    │ │
-│  │  - users              │  │  - Active boards             │ │
-│  │  - boards             │  │  - Recent elements           │ │
-│  │  - elements           │  │  - User sessions             │ │
-│  │  - change_events      │  │                              │ │
-│  │  - collaborators      │  │  Pub/Sub:                    │ │
-│  │                       │  │  - Real-time notifications   │ │
-│  │  Features:            │  │  - WebSocket scaling         │ │
-│  │  - ACID transactions  │  │                              │ │
-│  │  - JSONB support      │  │                              │ │
-│  │  - Full-text search   │  │                              │ │
-│  │  - Backup & recovery  │  │                              │ │
-│  └──────────────────────┘  └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Core Algorithms
-
-**1. Auto-Save Algorithm**
-- **Purpose**: Never lose user work
-- **Approach**:
-  - Debounce saves: wait 2 seconds after last change
-  - Save to database asynchronously (don't block UI)
-  - Optimistic updates: show "saved" before server confirms
-  - Retry failed saves with exponential backoff
-  - Show "saving..." indicator during save operation
-
-**2. Board Loading Algorithm**
-- **Purpose**: Fast board access
-- **Approach**:
-  - Check Redis cache first (fast)
-  - If not in cache, load from PostgreSQL
-  - Cache frequently accessed boards
-  - Load elements in batches (pagination)
-  - Prioritize visible elements first
-
-**3. Change Tracking Algorithm**
-- **Purpose**: Version history and conflict resolution
-- **Approach**:
-  - Every element change creates a ChangeEvent record
-  - Events are append-only (audit trail)
-  - Events include user ID, timestamp, element snapshot
-  - Server maintains running version counter per board
-  - Enable "time travel" to any previous version
-
-### Success Metrics
-- Save latency: <500ms average
-- Load time: <2 seconds for typical board
-- Data durability: 100% (no data loss)
-- Auto-save reliability: >99.9%
-
----
-
-## ✨ Milestone 5: Advanced Features
-**Duration**: 1.5 weeks  
-**Goal**: Professional features for power users and teams
-
-### Product Goals
-- Enable users to share work in multiple formats
-- Provide version control for collaborative editing
-- Support team communication within whiteboards
-- Optimize performance for large boards
-
-### User Stories
-
-**As a** designer,  
-**I want to** export my whiteboard as PNG or SVG,  
-**So that** I can share it in presentations or documents
-
-**Acceptance Criteria**:
-- [ ] User can export board as PNG (raster)
-- [ ] User can export board as SVG (vector)
-- [ ] User can export board as PDF
-- [ ] Export includes all elements with correct styling
-- [ ] Export maintains canvas dimensions
-
-**As a** team lead,  
-**I want to** see the history of changes to our board,  
-**So that** I can understand how it evolved
-
-**Acceptance Criteria**:
-- [ ] Timeline shows all changes with timestamps
-- [ ] User can click timeline to see board at any point
-- [ ] Changes show who made them and what changed
-- [ ] User can restore to any previous version
-
-**As a** collaborator,  
-**I want to** add comments to specific parts of the board,  
-**So that** I can give feedback without disrupting the drawing
-
-**Acceptance Criteria**:
-- [ ] User can add comments by clicking on board
-- [ ] Comments show as sticky notes or markers
-- [ ] Comments are visible to all collaborators
-- [ ] Comments sync in real-time
-
-### User Flow
-
-```
-Export Feature Flow
-┌─────────────────┐
-│ User working    │
-│ on whiteboard   │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ User clicks     │
-│ "Export"        │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Select format   │
-│ (PNG/SVG/PDF)   │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Set dimensions  │
-│ (optional)      │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Generate export │
-│ on server       │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Download file   │
-│ to device       │
-└─────────────────┘
-
-Version History Flow
-┌─────────────────┐
-│ User clicks     │
-│ "History"       │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Timeline view   │
-│ shows all       │
-│ changes         │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Click on        │
-│ timeline item   │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Board state     │
-│ shown at that   │
-│ point in time   │
-└───────┬─────────┘
-        │
-        ▼
-┌─────────────────┐
-│ Click "Restore" │
-│ to revert       │
-└─────────────────┘
-```
-
-### High-Level Architecture
-
-```
-Advanced Features Architecture
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend Layer                           │
-│                                                             │
-│  ┌──────────────────────┐  ┌──────────────────────────────┐ │
-│  │  Export Component    │  │  Version History Component   │ │
-│  │  - Format selector   │  │  - Timeline view             │ │
-│  │  - Dimension input   │  │  - Version preview           │ │
-│  │  - Progress bar      │  │  - Restore button            │ │
-│  └──────────┬───────────┘  └────────────┬─────────────────┘ │
-└─────────────┼────────────────────────────┼─────────────────┘
-              │                            │
-              ▼                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    API Layer                                │
-│                                                             │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  Export Service                                        │ │
-│  │  - Raster rendering (PNG)                              │ │
-│  │  - Vector rendering (SVG)                              │ │
-│  │  - PDF generation                                      │ │
-│  │  - Format conversion                                   │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-│                       │                                     │
-│  ┌────────────────────▼───────────────────────────────────┐ │
-│  │  Version Service                                       │ │
-│  │  - Change event queries                                │ │
-│  │  - Version comparison                                  │ │
-│  │  - Snapshot restoration                                │ │
-│  │  - Timeline generation                                 │ │
-│  └────────────────────┬───────────────────────────────────┘ │
-└───────────────────────┼─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Data Layer                               │
-│                                                             │
-│  ┌──────────────────────┐  ┌──────────────────────────────┐ │
-│  │  change_events       │  │  elements (full history)     │ │
-│  │  table               │  │  table                       │ │
-│  │                       │  │                              │ │
-│  │  Columns:             │  │  Columns:                    │ │
-│  │  - id                 │  │  - id                        │ │
-│  │  - board_id           │  │  - board_id                  │ │
-│  │  - user_id            │  │  - element data              │ │
-│  │  - event_type         │  │  - version number            │ │
-│  │  - element_snapshot   │  │  - timestamp                 │ │
-│  │  - version            │  │                              │ │
-│  │  - created_at         │  │                              │ │
-│  └──────────────────────┘  └──────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Core Algorithms
-
-**1. Export Rendering Algorithm**
-- **Purpose**: Generate high-quality exports in multiple formats
-- **Approach**:
-  - Server-side rendering for consistency
-  - Raster (PNG): Draw to image canvas at target resolution
-  - Vector (SVG): Generate SVG XML from element data
-  - PDF: Use PDF library (e.g., go-pdf) to create document
-  - Optimize for file size vs quality trade-off
-
-**2. Version History Algorithm**
-- **Purpose**: Enable time-travel through board changes
-- **Approach**:
-  - Every element change creates immutable snapshot
-  - Build timeline by querying change_events ordered by time
-  - Restore: reapply changes up to target version
-  - Diff algorithm: compare versions to show what changed
-  - Cache frequent version states
-
-**3. Comments System Algorithm**
-- **Purpose**: Add context and communication to whiteboards
-- **Approach**:
-  - Comments are position-based (x, y coordinates)
-  - Can be attached to elements or free-floating
-  - Real-time sync via WebSocket (like drawing)
-  - Threading: replies to comments
-  - Mention system: @username notifications
-
-### Success Metrics
-- Export generation time: <5 seconds
-- Version history load: <2 seconds
-- Comments sync latency: <200ms
-- Performance: Smooth with 100+ elements
+### Success Metrics - V4
+- Real-time latency: <100ms end-to-end
+- Concurrent users per board: 10+
+- Conflict resolution: 100% data integrity
+- Presence accuracy: <2 second delay
 
 ---
 
 ## 📊 Overall Project Timeline
 
 ```
-Week 1:     Milestone 1 - Single-User Whiteboard
+Week 1-2:   V1 - Offline-First Single Board
             ├─ Days 1-3: Core drawing tools
-            ├─ Days 4-5: Undo/redo & localStorage
-            └─ Day 6-7: Testing & polish
+            ├─ Days 4-5: IndexedDB persistence
+            ├─ Days 6-7: Export functionality
+            ├─ Days 8-10: UI polish & testing
+            └─ Days 11-14: V1 launch & feedback
 
-Week 2-3:   Milestone 2 - Multi-User Real-Time
-            ├─ Week 2: WebSocket server, basic sync
-            ├─ Week 3: Presence indicators, conflict resolution
+Week 3-4:   V2 - Cloud Sync & Authentication
+            ├─ Week 3: User auth, database schema
+            ├─ Week 4: RxDB sync, migration UX
 
-Week 4:     Milestone 3 - User Authentication
-            ├─ Days 1-3: Auth endpoints, JWT
-            ├─ Days 4-5: Protected routes, login UI
-            └─ Days 6-7: Testing & integration
+Week 5:     V3 - Multi-Board Management
+            ├─ Days 1-3: Dashboard UI, board CRUD
+            ├─ Days 4-5: Templates, search
+            └─ Days 6-7: Testing & polish
 
-Week 5:     Milestone 4 - Database Persistence
-            ├─ Days 1-3: Schema design, migrations
-            ├─ Days 4-5: CRUD operations, auto-save
-            └─ Days 6-7: Performance optimization
-
-Week 6-7:   Milestone 5 - Advanced Features
-            ├─ Week 6: Export, version history
-            └─ Week 7: Comments, performance, deployment
+Week 6-7:   V4 - Real-Time Collaboration
+            ├─ Week 6: WebSocket server, presence
+            └─ Week 7: Conflict resolution, permissions
 ```
 
 ---
 
-## 🎯 Success Metrics by Milestone
+## 🎯 Success Metrics by Version
 
-### Milestone 1: Single-User Whiteboard
+### V1 Success Criteria
 **Primary Metrics**:
-- Time to first drawing: <10 seconds
-- Drawing smoothness: 60fps
-- Data persistence: 100% (no data loss)
-- Undo/redo depth: 20+ operations
+- Time to first drawing: <3 seconds
+- Offline capability: 100% functional
+- Data durability: Zero data loss
+- User adoption: Organic growth without marketing
 
 **Quality Gates**:
-- [ ] All 5 tools working smoothly
-- [ ] Auto-save every 2 seconds
-- [ ] State persists on page refresh
-- [ ] No visual glitches or lag
+- [ ] All 8 drawing tools work flawlessly
+- [ ] Export quality matches paid tools
+- [ ] Multi-tab synchronization works
+- [ ] App works in airplane mode
 
-### Milestone 2: Multi-User Real-Time
+### V2 Success Criteria
 **Primary Metrics**:
-- End-to-end latency: <100ms
+- V1→V2 migration: >90% success rate
+- Cloud sync latency: <5 seconds
+- User registration rate: >60% of V1 users
+- Offline fallback: 100% maintained
+
+**Quality Gates**:
+- [ ] No data loss during sync
+- [ ] Conflict resolution works transparently
+- [ ] Login optional (V1 users not forced)
+- [ ] Cross-device access verified
+
+### V3 Success Criteria
+**Primary Metrics**:
+- Board creation: <3 seconds
+- Dashboard performance: <2 second load
+- Template adoption: >40% of new boards
+- Search response: <200ms
+
+**Quality Gates**:
+- [ ] Unlimited boards per user
+- [ ] Template quality (professional-looking)
+- [ ] Dashboard is intuitive
+- [ ] Board management (rename, delete) works
+
+### V4 Success Criteria
+**Primary Metrics**:
+- Real-time latency: <100ms
 - Concurrent users: 10+ per board
-- Message reliability: >99%
-- Presence accuracy: <5 second delay
+- Presence accuracy: <2 second delay
+- Conflict resolution: 100% integrity
 
 **Quality Gates**:
-- [ ] 3+ users can draw simultaneously
-- [ ] All drawings appear instantly
-- [ ] Cursors show in real-time
+- [ ] Multiple users can edit simultaneously
 - [ ] No conflicts or lost updates
-
-### Milestone 3: User Authentication
-**Primary Metrics**:
-- Registration success: >95%
-- Login success: >98%
-- Unauthorized access blocked: 100%
-- Session security: JWT expires in 24h
-
-**Quality Gates**:
-- [ ] Secure password hashing (bcrypt)
-- [ ] Protected API endpoints
-- [ ] WebSocket requires auth
-- [ ] Proper session management
-
-### Milestone 4: Database Persistence
-**Primary Metrics**:
-- Save latency: <500ms
-- Load time: <2 seconds
-- Data durability: 100%
-- Auto-save reliability: >99.9%
-
-**Quality Gates**:
-- [ ] All boards persist to DB
-- [ ] Auto-save works flawlessly
-- [ ] Can list/delete boards
-- [ ] No data loss scenarios
-
-### Milestone 5: Advanced Features
-**Primary Metrics**:
-- Export time: <5 seconds
-- Version history load: <2 seconds
-- Comments sync: <200ms
-- Performance: 100+ elements smooth
-
-**Quality Gates**:
-- [ ] PNG/SVG/PDF export works
-- [ ] Timeline shows all changes
-- [ ] Comments sync in real-time
-- [ ] Production deployment successful
+- [ ] Permissions work correctly
+- [ ] Works on mobile devices
 
 ---
 
 ## 🚀 Next Steps
 
-### Immediate Actions
-1. **Week 1 Kickoff**
-   - Set up development environment (Golang, React, PostgreSQL)
-   - Create project repository structure
-   - Define coding standards and review process
+### Immediate Actions (Week 1)
+1. **Setup Development Environment**
+   - Initialize React + TypeScript + Vite project
+   - Configure RxDB with IndexedDB
+   - Setup build and deployment pipeline
 
-2. **Milestone 1 Start**
-   - Begin with single-user whiteboard
-   - Focus on core drawing experience
-   - Test thoroughly before moving to Milestone 2
+2. **Core Canvas Implementation**
+   - HTML5 Canvas component with React
+   - Basic drawing tools (pen, shapes)
+   - Event handling (mouse, touch)
+
+3. **Local Persistence**
+   - RxDB schema design
+   - Auto-save implementation
+   - Crash recovery
 
 ### Ongoing Activities
-1. **Daily Standups** (15 minutes)
-   - What was accomplished yesterday?
-   - What's planned for today?
-   - Any blockers or issues?
+1. **Weekly User Testing** (Fridays)
+   - Test with 5 target users
+   - Gather feedback on UX
+   - Iterate on features
 
-2. **Weekly Reviews** (1 hour)
-   - Review completed work
-   - Assess metrics vs. goals
-   - Adjust timeline if needed
-   - Plan next week's priorities
-
-3. **Milestone Retrospectives** (2 hours)
-   - What went well?
-   - What could be improved?
-   - Lessons learned
-   - Process adjustments
+2. **Performance Monitoring**
+   - Lighthouse scores
+   - Canvas rendering performance
+   - IndexedDB storage usage
 
 ### Decision Points
-- **End of Week 1**: Ready to proceed to Milestone 2?
-- **End of Week 3**: Authentication quality acceptable?
-- **End of Week 5**: Database performance meets targets?
-- **End of Week 7**: Ready for production launch?
+- **End of V1**: Launch to production or iterate?
+- **V2 Feature Scope**: What's minimum viable cloud sync?
+- **V3 Templates**: Which templates add most value?
+- **V4 Collaboration**: Start with simple or advanced features?
 
 ---
 
 ## Risk Management
 
 ### High-Risk Areas
-1. **Real-time synchronization complexity**
-   - Risk: Bugs in conflict resolution
-   - Mitigation: Extensive testing, user notifications
 
-2. **Database performance at scale**
-   - Risk: Slow queries with many elements
-   - Mitigation: Proper indexing, caching, pagination
+1. **RxDB Performance at Scale**
+   - **Risk**: Slow with 1000+ elements
+   - **Mitigation**: Canvas virtualization, element batching
 
-3. **WebSocket scaling**
-   - Risk: Can't handle many concurrent users
-   - Mitigation: Redis pub/sub, load testing
+2. **Sync Conflicts in V2**
+   - **Risk**: Data loss or corruption
+   - **Mitigation**: Conflict-free replicated data types (CRDTs)
+
+3. **WebSocket Scaling in V4**
+   - **Risk**: Can't handle many concurrent users
+   - **Mitigation**: Redis pub/sub, horizontal scaling
 
 ### Mitigation Strategies
-- **Incremental milestones**: Catch issues early
-- **Feature flags**: Deploy features gradually
-- **Automated testing**: Catch regressions
-- **Rollback plan**: Quick recovery if issues arise
-- **User feedback**: Continuous improvement
+- **Incremental Rollout**: Launch V1 first, validate demand
+- **Feature Flags**: Enable features gradually
+- **Automated Testing**: Catch regressions early
+- **Rollback Plan**: Quick recovery if issues arise
 
 ---
 
 ## Conclusion
 
-This roadmap provides a clear path from **simple drawing tool** to **full-featured collaborative platform** in 7 weeks. Each milestone builds on the previous, adding one major capability at a time.
+This offline-first evolution strategy delivers value **immediately** with V1, then progressively adds power with V2-V4. Each version is valuable on its own, building toward a world-class collaborative whiteboard.
 
 **Key Success Factors**:
-1. **Start simple**: Get basic functionality working fast
-2. **Add complexity gradually**: Each milestone adds one major feature
-3. **Measure everything**: Use metrics to guide decisions
-4. **Test thoroughly**: Quality gates prevent regressions
-5. **Iterate based on feedback**: Adjust as we learn
+1. **V1 Speed**: Ship offline-first version in 2 weeks
+2. **User Validation**: Prove demand before building backend
+3. **Progressive Enhancement**: Each version adds real value
+4. **Quality Focus**: Smooth 60fps drawing, zero data loss
+5. **User-Centric**: Solve real problems (offline, zero friction)
 
-**Expected Outcome**: A production-ready collaborative whiteboard platform that demonstrates advanced backend skills, real-time systems expertise, and user-centric product development.
+**Expected Outcome**: A production-ready collaborative whiteboard that starts simple (V1) and evolves into a powerful team collaboration tool (V4), with each version validated by real user adoption.
 
 ---
 
-*This document serves as the product management guide for engineers to build a world-class collaborative whiteboard platform.*
+*This PRD serves as the product roadmap for building a modern, offline-first collaborative whiteboard that puts user experience first.*
