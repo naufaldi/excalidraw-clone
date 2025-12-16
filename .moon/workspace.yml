@@ -1,0 +1,74 @@
+# https://moonrepo.dev/docs/config/workspace
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/workspace.json
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+vcs:
+  manager: 'git'
+  provider: gitlab
+  defaultBranch: 'main'
+  # @see: https://moonrepo.dev/docs/config/workspace#hooks
+  hooks:
+    pre-commit:
+      - 'moon run :format --affected --status=all'
+      - 'moon run :lint --affected --status=staged'
+  syncHooks: false
+
+hasher:
+  optimization: performance
+
+runner:
+  cacheLifetime: '24 hours'
+
+docker:
+  scaffold:
+    include:
+      - '**/.npmrc'
+      - '**/package.json'
+  prune:
+    installToolchainDeps: true
+    deleteVendorDirectories: false
+
+# Require a specific version of moon while running commands, otherwise fail.
+versionConstraint: '>=1.41.1'
+
+# Extend and inherit an external configuration file. Must be a valid HTTPS URL or file system path.
+# extends: './shared/workspace.yml'
+
+# REQUIRED: A map of all projects found within the workspace, or a list or file system globs.
+# When using a map, each entry requires a unique project ID as the map key, and a file system
+# path to the project folder as the map value. File paths are relative from the workspace root,
+# and cannot reference projects located outside the workspace boundary.
+projects:
+  globs:
+    - 'apps/*'
+    - 'infra/*'
+    - 'packages/*'
+
+# When enabled, will check for a newer moon version and send anonymous usage data to the
+# moonrepo team. This data is used to improve the quality and reliability of the tool.
+telemetry: false
+
+# Monorepo package templates to use when generating new projects.
+# @see: https://moonrepo.dev/docs/config/workspace#templates
+generator:
+  templates:
+    - 'https://oss.zero-one-group.com/monorepo/templates/ansible.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/astro.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/fastapi-ai.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/gitlab-cicd.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/go-clean.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/go-modular.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/load-balancer.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/monitoring.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/nextjs.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/phoenix.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/postgresql.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/react-app.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/react-ssr.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/shared-ui.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/squidproxy.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/strapi.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/swarm.zip'
+    - 'https://oss.zero-one-group.com/monorepo/templates/terragrunt.zip'
+    # Uncomment to enable local templates or debug custom templates.
+    # - './templates'

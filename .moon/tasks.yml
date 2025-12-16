@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/tasks.json
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+taskOptions:
+  runDepsInParallel: false
+
+# Defines task deps that are implicitly inserted into all inherited tasks within a project.
+# This is extremely useful for pre-building projects that are used extensively throughout
+# the repo, or always building project dependencies.
+# implicitDeps:
+#   - '^:format'
+
+# Common tasks that can be inherited by all projects.
+# @see: https://moonrepo.dev/docs/config/tasks
+tasks:
+  env:
+    command: 'printenv'
+    toolchain: 'system'
+    options:
+      outputStyle: stream
+      envFile: '.env'
+
+  docker-images:
+    script: |
+      IMAGE_PREFIX="$(jq -r .name <$workspaceRoot'/package.json')" \
+      && docker image list --filter reference=$IMAGE_PREFIX-$project\*
+    options:
+      mergeEnv: replace
+      runFromWorkspaceRoot: true
+      interactive: false
+      outputStyle: buffer-only-failure
+      runInCI: false
+      cache: false
+      shell: true
