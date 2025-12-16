@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "moon": {
+            "command": "moon",
+            "args": [
+                "mcp"
+            ],
+            "env": {
+                "MOON_WORKSPACE_ROOT": "/absolute/path/to/your/moon/workspace"
+            }
+        }
+    }
+}
