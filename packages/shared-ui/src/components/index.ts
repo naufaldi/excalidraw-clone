@@ -25,6 +25,10 @@ export * from "./button/button";
 export * from "./calendar/calendar";
 export * from "./card/card";
 export * from "./carousel/carousel";
+// Canvas Components (Whiteboard-specific)
+export * from "./canvas-toolbar/canvas-toolbar";
+export * from "./color-picker/color-picker";
+export * from "./layer-panel/layer-panel";
 // Visualizations
 export * from "./chart/chart";
 export * from "./checkbox/checkbox";

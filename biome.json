@@ -174,4 +174,18 @@
             }
         }
     }
+  },
+  "json": {
+    "formatter": {
+      "indentWidth": 4,
+      "trailingCommas": "none"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
 }
