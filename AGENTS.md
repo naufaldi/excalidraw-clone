@@ -50,6 +50,16 @@ Moon toolchain is configured with a “single version policy” (`rootPackageOnl
 - Prefer predictable state transitions (command/event style) to enable undo/redo and sync later.
 - Performance: avoid per-frame React state updates; keep hot drawing loops outside React when possible.
 
+## Frontend Folder Structure
+
+Use **feature-based structure** with:
+
+- **packages/shared-ui/**: UI components, hooks, styles (single source of truth)
+- **apps/frontend/src/features/**: Feature-specific business logic (components, hooks, services, types)
+- **apps/frontend/src/shared/**: App utilities ONLY (config, types, utils)
+
+Import UI from `@repo/shared-ui/components`, not from feature directories. Features export business logic only.
+
 ## Backend Implementation Rules (V2+)
 
 - Go code lives in `apps/backend` and follows standard layout (`cmd/`, `internal/`).
