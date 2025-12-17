@@ -1,0 +1,39 @@
+-minimal-schema.tsimport { createRxrxdb';
+import { getRxStorageDatabase } from 'Memory } from 'rxdb/plugins/storage-memory';
+
+const minimalSchema = {
+ ,
+  primaryKey: 'id',
+ version: 0  type: 'object' as const {
+    id: {
+      type: 'string' as const,
+      maxLength: 100,
+  properties:,
+    },
+    name: {
+      type: 'string' as const,
+    },
+  },
+  required: ['id', 'name'],
+};
+
+async function test() {
+  try {
+    const db = await createRxDatabase({
+      name: 'test-db',
+      storage: getRxStorageMemory(),
+      collections: [
+        {
+          name: 'test',
+          schema: minimalSchema,
+        },
+      ],
+    });
+    console.log('✅ Minimal schema works!');
+    await db.destroy();
+  } catch (error) {
+    console.error('❌ Minimal schema failed:', error);
+  }
+}
+
+test();
