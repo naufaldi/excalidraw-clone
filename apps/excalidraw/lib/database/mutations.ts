@@ -10,6 +10,13 @@ import {
   createDefaultPreferences,
 } from "./shared/index.js";
 
+function toStoredElement(
+  element: Element,
+): Omit<Element, "createdAt" | "updatedAt"> {
+  const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = element;
+  return rest;
+}
+
 /**
  * Create a new board
  */
@@ -23,8 +30,6 @@ export async function createBoard(data: Partial<Board>): Promise<Board> {
     id:
       data.id ||
       `board-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   };
 
   const doc = await collection.insert(boardData);
@@ -47,10 +52,7 @@ export async function updateBoard(
     throw new Error(`Board not found: ${boardId}`);
   }
 
-  const updatedDoc = await doc.incrementalPatch({
-    ...updates,
-    updatedAt: new Date(),
-  });
+  const updatedDoc = await doc.incrementalPatch(updates);
 
   console.log("[RxDB] Board updated:", boardId);
   return updatedDoc.toJSON() as Board;
@@ -116,16 +118,8 @@ export async function addElementToBoard(
     throw new Error(`Board not found: ${boardId}`);
   }
 
-  // Ensure element has timestamps
-  const elementWithTimestamps = {
-    ...element,
-    createdAt: element.createdAt || new Date(),
-    updatedAt: new Date(),
-  };
-
   const updatedDoc = await doc.incrementalPatch({
-    elements: [...doc.elements, elementWithTimestamps],
-    updatedAt: new Date(),
+    elements: [...doc.elements, toStoredElement(element)],
   });
 
   console.log("[RxDB] Element added to board:", boardId, element.id);
@@ -150,18 +144,16 @@ export async function updateElementInBoard(
 
   const elements = doc.elements.map((el: any) => {
     if (el.id === elementId) {
-      return {
+      return toStoredElement({
         ...el,
         ...updates,
-        updatedAt: new Date(),
-      };
+      });
     }
     return el;
   });
 
   const updatedDoc = await doc.incrementalPatch({
     elements,
-    updatedAt: new Date(),
   });
 
   console.log("[RxDB] Element updated in board:", boardId, elementId);
@@ -187,7 +179,6 @@ export async function deleteElementFromBoard(
 
   const updatedDoc = await doc.incrementalPatch({
     elements,
-    updatedAt: new Date(),
   });
 
   console.log("[RxDB] Element deleted from board:", boardId, elementId);
@@ -213,18 +204,16 @@ export async function updateMultipleElementsInBoard(
   const elements = doc.elements.map((el: any) => {
     const update = elementUpdates.find((u) => u.id === el.id);
     if (update) {
-      return {
+      return toStoredElement({
         ...el,
         ...update.updates,
-        updatedAt: new Date(),
-      };
+      });
     }
     return el;
   });
 
   const updatedDoc = await doc.incrementalPatch({
     elements,
-    updatedAt: new Date(),
   });
 
   console.log(
@@ -257,7 +246,6 @@ export async function deleteMultipleElementsFromBoard(
 
   const updatedDoc = await doc.incrementalPatch({
     elements,
-    updatedAt: new Date(),
   });
 
   console.log(
@@ -285,7 +273,6 @@ export async function clearAllElementsFromBoard(
 
   const updatedDoc = await doc.incrementalPatch({
     elements: [],
-    updatedAt: new Date(),
   });
 
   console.log("[RxDB] All elements cleared from board:", boardId);
@@ -309,10 +296,10 @@ export async function updateBoardPreferences(
 
   const updatedDoc = await doc.incrementalPatch({
     preferences: {
-      ...doc.preferences,
-      ...preferences,
+      theme: preferences?.theme ?? doc.preferences?.theme ?? "light",
+      gridEnabled:
+        preferences?.gridEnabled ?? doc.preferences?.gridEnabled ?? true,
     },
-    updatedAt: new Date(),
   });
 
   console.log("[RxDB] Board preferences updated:", boardId);
@@ -330,8 +317,6 @@ export async function getOrCreateUserPreferences(): Promise<UserPreferences> {
   if (!doc) {
     doc = await collection.insert({
       ...createDefaultPreferences(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
     console.log("[RxDB] Default user preferences created");
   }
@@ -355,15 +340,10 @@ export async function updateUserPreferences(
       ...createDefaultPreferences(),
       ...updates,
       id: "global",
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
   } else {
     // Update existing
-    doc = await doc.incrementalPatch({
-      ...updates,
-      updatedAt: new Date(),
-    });
+    doc = await doc.incrementalPatch(updates);
   }
 
   console.log("[RxDB] User preferences updated");
@@ -380,16 +360,10 @@ export async function createBoardWithElements(
   const boardData = {
     ...createDefaultBoard(),
     ...data,
-    elements: elements.map((el) => ({
-      ...el,
-      createdAt: el.createdAt || new Date(),
-      updatedAt: new Date(),
-    })),
+    elements: elements.map(toStoredElement),
     id:
       data.id ||
       `board-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   };
 
   const collection = getBoardsCollection();
@@ -417,8 +391,6 @@ export async function createMultipleBoards(
     id:
       board.id ||
       `board-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   }));
 
   const docs = await collection.bulkInsert(boardData);
@@ -483,7 +455,6 @@ export async function reorderElementsInBoard(
       return {
         ...el,
         zIndex: newZIndex,
-        updatedAt: new Date(),
       };
     }
     return el;
@@ -491,7 +462,6 @@ export async function reorderElementsInBoard(
 
   const updatedDoc = await doc.incrementalPatch({
     elements,
-    updatedAt: new Date(),
   });
 
   console.log(

@@ -6,19 +6,32 @@
 import {
   addRxPlugin,
   createRxDatabase,
+  type RxStorage,
   type RxCollection,
   type RxDatabase,
 } from "rxdb";
 import { getRxStorageDexie } from "rxdb/plugins/storage-dexie";
 import { getRxStorageMemory } from "rxdb/plugins/storage-memory";
+import { RxDBDevModePlugin } from "rxdb/plugins/dev-mode";
+import { wrappedValidateAjvStorage } from "rxdb/plugins/validate-ajv";
+import { RxDBMigrationSchemaPlugin } from "rxdb/plugins/migration-schema";
 
 // Import schemas and types from shared package
 import {
   type Board,
+  boardMigrationStrategies,
   boardSchema,
   type UserPreferences,
   userPreferencesSchema,
 } from "./shared/index.js";
+
+// Add required plugins
+addRxPlugin(RxDBMigrationSchemaPlugin);
+
+// Add dev-mode plugin in development
+if (process.env.NODE_ENV === "development") {
+  addRxPlugin(RxDBDevModePlugin);
+}
 
 /**
  * Database instance
@@ -40,21 +53,33 @@ export async function initializeDatabase(): Promise<RxDatabase> {
   console.log("[RxDB] Initializing database...");
 
   try {
-    // Use memory storage for testing
-    const storage = getRxStorageMemory();
+    // Use appropriate storage based on environment
+    // Tests run in Node.js (no IndexedDB) - use memory storage
+    // Browser uses IndexedDB
+    const baseStorage: RxStorage<any, any> =
+      typeof window !== "undefined" && "indexedDB" in window
+        ? getRxStorageDexie()
+        : getRxStorageMemory();
+
+    const storage = wrappedValidateAjvStorage({
+      storage: baseStorage,
+    });
 
     // Create database first (RxDB v16 API)
     const db = await createRxDatabase({
       name: "whiteboard-db",
-      storage, // Use memory storage for testing
-      multiInstance: true, // Enable multi-tab synchronization
+      storage, // Use appropriate storage with validation
+      multiInstance: typeof window !== "undefined" && "indexedDB" in window, // Only enable in browser
       eventReduce: true, // Optimize memory usage
+      closeDuplicates: true, // Automatically close duplicates (dev-mode only)
     });
 
     // Add collections after database creation (RxDB v16 API)
     await db.addCollections({
       boards: {
         schema: boardSchema,
+        migrationStrategies: boardMigrationStrategies,
+        autoMigrate: true,
       },
       userPreferences: {
         schema: userPreferencesSchema,
@@ -74,6 +99,27 @@ export async function initializeDatabase(): Promise<RxDatabase> {
       "[RxDB] Error details:",
       JSON.stringify(error, Object.getOwnPropertyNames(error)),
     );
+
+    const rxCode =
+      typeof error === "object" && error !== null && "code" in error
+        ? (error as any).code
+        : undefined;
+    const isSchemaMismatch =
+      rxCode === "DB6" ||
+      (error instanceof Error &&
+        (error.message.includes("DB6") ||
+          error.message.includes("different schema")));
+
+    if (isSchemaMismatch) {
+      console.error(
+        [
+          "[RxDB] Schema mismatch detected (DB6).",
+          "This happens when the persisted IndexedDB database was created with an older/different collection schema.",
+          "Fix: bump the RxDB schema `version` and add `migrationStrategies`, or (dev only) wipe the local database via `resetDatabase()` / browser storage clear.",
+        ].join(" "),
+      );
+    }
+
     throw new Error(
       `Database initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
@@ -164,9 +210,10 @@ export async function closeDatabase(): Promise<void> {
   }
 
   try {
-    // Note: Database cleanup handled by RxDB internals
-    databaseInstance = null;
+    // Properly close the RxDB database before nullifying reference
+    await databaseInstance.close();
     console.log("[RxDB] Database connection closed");
+    databaseInstance = null;
   } catch (error) {
     console.error("[RxDB] Error closing database:", error);
     throw error;

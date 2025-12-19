@@ -3,9 +3,10 @@
  * Provides reactive queries for boards and elements with automatic UI updates
  */
 
-import type { RxCollection, RxDocument, RxQuery } from "rxdb";
 import { getBoardsCollection, getPreferencesCollection } from "./database.js";
 import type { Board, QueryOptions, UserPreferences } from "./shared/index.js";
+
+const LAST_WRITE_TIME_FIELD = "_meta.lwt" as const;
 
 /**
  * Reactive query for all boards
@@ -13,7 +14,10 @@ import type { Board, QueryOptions, UserPreferences } from "./shared/index.js";
  */
 export function getAllBoardsQuery() {
   const collection = getBoardsCollection();
-  return collection.find().sort({ updatedAt: "desc" }).exec();
+  return collection
+    .find()
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+    .exec();
 }
 
 /**
@@ -31,7 +35,11 @@ export function getBoardByIdQuery(boardId: string) {
  */
 export function getRecentBoardsQuery(limit: number = 10) {
   const collection = getBoardsCollection();
-  return collection.find().sort({ updatedAt: "desc" }).limit(limit).exec();
+  return collection
+    .find()
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+    .limit(limit)
+    .exec();
 }
 
 /**
@@ -46,7 +54,7 @@ export function searchBoardsQuery(searchTerm: string) {
         name: { $regex: `(?i)${searchTerm}` },
       },
     })
-    .sort({ updatedAt: "desc" })
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
     .exec();
 }
 
@@ -96,7 +104,9 @@ export function getBoardsByElementCountRange(min: number, max: number) {
  */
 export function createBoardsQuery(options: QueryOptions = {}) {
   const collection = getBoardsCollection();
-  let query = collection.find().sort({ updatedAt: "desc" });
+  let query = collection
+    .find()
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any);
 
   if (options.limit) {
     query = query.limit(options.limit);
@@ -115,13 +125,12 @@ export function createBoardsQuery(options: QueryOptions = {}) {
  */
 export function getBoardsCreatedAfter(date: Date) {
   const collection = getBoardsCollection();
+  const since = date.getTime();
   return collection
     .find({
-      selector: {
-        createdAt: { $gt: date },
-      },
+      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
     })
-    .sort({ createdAt: "desc" })
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
     .exec();
 }
 
@@ -131,13 +140,12 @@ export function getBoardsCreatedAfter(date: Date) {
  */
 export function getBoardsUpdatedAfter(date: Date) {
   const collection = getBoardsCollection();
+  const since = date.getTime();
   return collection
     .find({
-      selector: {
-        updatedAt: { $gt: date },
-      },
+      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
     })
-    .sort({ updatedAt: "desc" })
+    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
     .exec();
 }
 
@@ -201,7 +209,7 @@ export function createBoardCountObservable() {
  */
 export function createLiveBoardsQuery() {
   const collection = getBoardsCollection();
-  return collection.find().sort({ updatedAt: "desc" }).$; // $ returns an observable
+  return collection.find().sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any).$; // $ returns an observable
 }
 
 /**
@@ -228,11 +236,10 @@ export function createLivePreferencesQuery() {
  */
 export function getBoardsForSync(lastSyncTime: Date) {
   const collection = getBoardsCollection();
+  const since = lastSyncTime.getTime();
   return collection
     .find({
-      selector: {
-        updatedAt: { $gt: lastSyncTime },
-      },
+      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
     })
     .exec();
 }

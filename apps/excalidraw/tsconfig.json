@@ -15,11 +15,18 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "ES2023",
-		"types": ["node", "vite/client", "@testing-library/jest-dom"],
+		"types": [
+			"node",
+			"vite/client",
+			"@testing-library/jest-dom",
+			"vitest/globals"
+		],
 		"verbatimModuleSyntax": true,
 		"baseUrl": ".",
 		"paths": {
 			"#/*": ["./app/*"],
+			"#lib/*": ["./lib/*"],
+			"#hooks/*": ["./hooks/*"],
 			"@repo/shared/*": ["../../packages/shared/src/*"]
 		}
 	},
@@ -28,6 +35,8 @@
 		"**/.server/**/*",
 		".react-router/types/**/*",
 		"app/**/*",
+		"lib/**/*",
+		"hooks/**/*",
 		"tests/**/*",
 		"tests-e2e/**/*"
 	],
