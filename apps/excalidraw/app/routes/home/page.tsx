@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Canvas } from "#/components/canvas/index.js";
+import { Canvas } from "@/components/canvas/index.js";
 import {
   addElementToBoard,
   createBoard,

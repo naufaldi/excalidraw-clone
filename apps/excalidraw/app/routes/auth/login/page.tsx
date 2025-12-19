@@ -1,5 +1,5 @@
 import * as Lucide from "lucide-react";
-import { Link } from "#/components/link";
+import { Link } from "@/components/link";
 import type { Route } from "./+types/page";
 import { LoginForm } from "./form";
 

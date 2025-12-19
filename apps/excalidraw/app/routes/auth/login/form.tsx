@@ -1,6 +1,6 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Link } from "#/components/link";
+import { Link } from "@/components/link";
 import { type LoginState, loginAction } from "./action";
 
 function SubmitButton() {

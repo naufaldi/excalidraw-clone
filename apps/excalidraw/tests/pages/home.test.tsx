@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRoutesStub } from "react-router";
 import { describe, expect, it } from "vitest";
-import Homepage from "#/routes/home/page";
+import Homepage from "@/routes/home/page";
 
 // Setup userEvent for interaction testing
 const actor = userEvent.setup();

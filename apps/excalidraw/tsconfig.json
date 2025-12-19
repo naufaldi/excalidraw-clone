@@ -24,7 +24,7 @@
 		"verbatimModuleSyntax": true,
 		"baseUrl": ".",
 		"paths": {
-			"#/*": ["./app/*"],
+			"@/*": ["./app/*"],
 			"#lib/*": ["./lib/*"],
 			"#hooks/*": ["./hooks/*"],
 			"@repo/shared/*": ["../../packages/shared/src/*"]

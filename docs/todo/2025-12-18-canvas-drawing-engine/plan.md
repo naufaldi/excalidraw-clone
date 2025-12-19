@@ -176,8 +176,8 @@ Create the base Canvas component with proper sizing and context setup.
 
 5. `apps/excalidraw/app/components/canvas/Canvas.tsx` - Main component:
 
-        import { useCanvasSize } from '#/hooks/canvas';
-        import type { Element } from '#/lib/database/shared/types';
+        import { useCanvasSize } from '@/hooks/canvas';
+        import type { Element } from '@/lib/database/shared/types';
 
         interface CanvasProps {
           elements: Element[];
@@ -203,7 +203,7 @@ Add mouse and touch event handlers with coordinate transformation.
 
 1. `apps/excalidraw/lib/canvas/utils.ts` - Coordinate transforms:
 
-        import type { Point } from '#/lib/database/shared/types';
+        import type { Point } from '@/lib/database/shared/types';
         import type { Viewport } from './types';
 
         export function screenToCanvas(screenX: number, screenY: number, viewport: Viewport): Point {
@@ -222,7 +222,7 @@ Add mouse and touch event handlers with coordinate transformation.
 
 2. `apps/excalidraw/hooks/canvas/use-viewport.ts` - Viewport state:
 
-        import type { Viewport } from '#/lib/canvas';
+        import type { Viewport } from '@/lib/canvas';
 
         export function useViewport(initialViewport?: Partial<Viewport>) {
           const [viewport, setViewport] = useState<Viewport>({
@@ -241,8 +241,8 @@ Add mouse and touch event handlers with coordinate transformation.
 
 3. `apps/excalidraw/hooks/canvas/use-canvas-events.ts` - Event handling:
 
-        import type { DrawingState } from '#/lib/canvas';
-        import { screenToCanvas } from '#/lib/canvas';
+        import type { DrawingState } from '@/lib/canvas';
+        import { screenToCanvas } from '@/lib/canvas';
 
         export function useCanvasEvents(
           canvasRef: RefObject<HTMLCanvasElement>,
@@ -279,7 +279,7 @@ Implement render loop and shape drawing functions.
 
 1. `apps/excalidraw/lib/canvas/renderer.ts` - Drawing functions:
 
-        import type { Element } from '#/lib/database/shared/types';
+        import type { Element } from '@/lib/database/shared/types';
         import type { Viewport } from './types';
 
         export function drawRectangle(ctx: CanvasRenderingContext2D, element: Element): void {
@@ -322,7 +322,7 @@ Implement render loop and shape drawing functions.
 
 2. `apps/excalidraw/hooks/canvas/use-draw-loop.ts` - RAF render loop:
 
-        import { renderElements } from '#/lib/canvas';
+        import { renderElements } from '@/lib/canvas';
 
         export function useDrawLoop(
           canvasRef: RefObject<HTMLCanvasElement>,
@@ -363,8 +363,8 @@ Connect canvas to database for persistence.
 
 1. `apps/excalidraw/app/routes/home/page.tsx` - Integrate Canvas:
 
-        import { Canvas } from '#/app/components/canvas';
-        import type { Element } from '#/lib/database/shared/types';
+        import { Canvas } from '@/app/components/canvas';
+        import type { Element } from '@/lib/database/shared/types';
 
         export default function Page() {
           const [elements, setElements] = useState<Element[]>([]);
