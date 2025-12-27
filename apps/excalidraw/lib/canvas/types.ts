@@ -21,6 +21,9 @@ export interface DrawingState {
 	currentTool: ElementType;
 	startPoint: Point | null;
 	previewElement: Element | null;
+	strokeWidth: number;
+	strokeColor: string;
+	fillColor: string;
 }
 
 /**
@@ -49,4 +52,7 @@ export const DEFAULT_DRAWING_STATE: DrawingState = {
 	currentTool: "rectangle",
 	startPoint: null,
 	previewElement: null,
+	strokeWidth: 2,
+	strokeColor: "var(--stroke-primary)",
+	fillColor: "var(--fill-transparent)",
 };

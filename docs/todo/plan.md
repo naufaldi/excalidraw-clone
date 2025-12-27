@@ -107,12 +107,12 @@ Build a collaborative whiteboard that works **offline-first** using RxDB, then s
 ### Task 5: Canvas Component & Drawing Engine
 **Description**: Create HTML5 Canvas component with drawing capabilities
 **Acceptance Criteria**:
-- [ ] Canvas component renders properly
-- [ ] Mouse/touch event handlers working
-- [ ] Drawing operations (line, rectangle, circle) functional
-- [ ] Smooth drawing performance (60fps)
-- [ ] Coordinate system properly implemented
-- [ ] Canvas resizes with window
+- [x] Canvas component renders properly
+- [x] Mouse/touch event handlers working
+- [x] Drawing operations (line, rectangle, circle) functional
+- [x] Smooth drawing performance (60fps)
+- [x] Coordinate system properly implemented
+- [x] Canvas resizes with window
 **Effort**: 8 story points  
 **Priority**: High  
 **Dependencies**: Task 4  

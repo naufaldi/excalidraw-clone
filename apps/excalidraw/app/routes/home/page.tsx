@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Canvas } from "@/components/canvas/index.js";
+import { CanvasToolbar, type Tool } from "@repo/shared-ui/components";
 import {
   addElementToBoard,
   createBoard,
@@ -7,7 +8,7 @@ import {
   getBoardByIdQuery,
   initializeDatabase,
 } from "#lib/database/index.js";
-import type { Element, ElementType } from "#lib/database/shared/types.js";
+import type { Element } from "#lib/database/shared/types.js";
 import type { Route } from "./+types/page";
 
 export function meta(_props: Route.MetaArgs) {
@@ -21,7 +22,10 @@ const DEFAULT_BOARD_ID = "default-board";
 
 export default function Page() {
   const [elements, setElements] = useState<Element[]>([]);
-  const [currentTool, setCurrentTool] = useState<ElementType>("rectangle");
+  const [currentTool, setCurrentTool] = useState<Tool>("rectangle");
+  const [strokeWidth, setStrokeWidth] = useState(2);
+  const [strokeColor, setStrokeColor] = useState("var(--stroke-primary)");
+  const [fillColor, setFillColor] = useState("var(--fill-transparent)");
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -107,45 +111,26 @@ export default function Page() {
         overflow: "hidden",
       }}
     >
-      {/* Toolbar */}
+      {/* Enhanced Toolbar */}
       <div
         style={{
           position: "absolute",
           top: 16,
           left: "50%",
           transform: "translateX(-50%)",
-          display: "flex",
-          gap: 8,
-          padding: 8,
-          backgroundColor: "white",
-          borderRadius: 8,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
           zIndex: 100,
         }}
       >
-        <ToolButton
-          tool="rectangle"
-          currentTool={currentTool}
-          onClick={() => setCurrentTool("rectangle")}
-          label="□"
-        />
-        <ToolButton
-          tool="circle"
-          currentTool={currentTool}
-          onClick={() => setCurrentTool("circle")}
-          label="○"
-        />
-        <ToolButton
-          tool="line"
-          currentTool={currentTool}
-          onClick={() => setCurrentTool("line")}
-          label="/"
-        />
-        <ToolButton
-          tool="arrow"
-          currentTool={currentTool}
-          onClick={() => setCurrentTool("arrow")}
-          label="→"
+        <CanvasToolbar
+          selectedTool={currentTool}
+          strokeWidth={strokeWidth}
+          strokeColor={strokeColor}
+          fillColor={fillColor}
+          onToolSelect={setCurrentTool}
+          onStrokeWidthChange={setStrokeWidth}
+          onStrokeColorChange={setStrokeColor}
+          onFillColorChange={setFillColor}
+          orientation="horizontal"
         />
       </div>
 
@@ -173,40 +158,11 @@ export default function Page() {
       <Canvas
         elements={elements}
         currentTool={currentTool}
+        strokeWidth={strokeWidth}
+        strokeColor={strokeColor}
+        fillColor={fillColor}
         onElementCreate={handleElementCreate}
       />
     </div>
-  );
-}
-
-interface ToolButtonProps {
-  tool: ElementType;
-  currentTool: ElementType;
-  onClick: () => void;
-  label: string;
-}
-
-function ToolButton({ tool, currentTool, onClick, label }: ToolButtonProps) {
-  const isActive = tool === currentTool;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        width: 40,
-        height: 40,
-        border: isActive ? "2px solid #0066ff" : "1px solid #ccc",
-        borderRadius: 4,
-        backgroundColor: isActive ? "#e6f0ff" : "white",
-        cursor: "pointer",
-        fontSize: 18,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-      title={tool}
-    >
-      {label}
-    </button>
   );
 }
