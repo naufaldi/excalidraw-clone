@@ -24,6 +24,10 @@ import {
 	renderSelectionBox,
 	renderSelectionHighlights,
 } from "#lib/canvas/renderer.js";
+
+// Debug: Track re-renders
+let renderCount = 0;
+let mountCount = 0;
 import type {
 	Element,
 	ElementType,
@@ -82,6 +86,24 @@ export function Canvas({
 	const { width, height } = useCanvasSize();
 	const { viewport, pan } = useViewport();
 
+	// Debug: Log component mount
+	useEffect(() => {
+		mountCount++;
+		console.log(`[Canvas Component] MOUNTED (count: ${mountCount})`);
+
+		return () => {
+			console.log(`[Canvas Component] UNMOUNTED (count: ${mountCount})`);
+		};
+	}, []);
+
+	// Debug: Log re-renders
+	useEffect(() => {
+		renderCount++;
+		console.log(
+			`[Canvas Component] RENDERED (count: ${renderCount}, tool: ${currentTool})`,
+		);
+	}, [currentTool, elements]);
+
 	const [drawingState, setDrawingState] = useState<DrawingState>({
 		...DEFAULT_DRAWING_STATE,
 		currentTool: currentTool as ElementType,
@@ -102,7 +124,6 @@ export function Canvas({
 	});
 
 	const isShiftPressedRef = useRef(false);
-
 
 	// Update current tool and styles when props change
 	if (

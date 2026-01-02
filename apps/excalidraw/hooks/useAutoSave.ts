@@ -92,7 +92,7 @@ export function useAutoSave({
 	useEffect(() => {
 		if (elements.length === 0) return;
 		triggerSave(elements);
-	}, [elements, triggerSave]);
+	}, [elements]);
 
 	// Force save function
 	const forceSave = useCallback(async () => {
@@ -113,22 +113,12 @@ export function useAutoSave({
 
 	// Page unload handler - save immediately
 	useEffect(() => {
-		const handleBeforeUnload = async () => {
-			// Use sendBeacon if available for reliable unload saving
-			if (navigator.sendBeacon) {
-				const elementsToSave = pendingSaveRef.current ?? elements;
-				const data = JSON.stringify({
-					boardId,
-					elements: elementsToSave,
-					timestamp: Date.now(),
-				});
-
-				// Create a beacon with minimal data
-				const blob = new Blob([data], { type: "application/json" });
-				navigator.sendBeacon("/api/save", blob);
-			} else {
-				// Fallback: synchronous save before unload
-				await forceSave();
+		const handleBeforeUnload = () => {
+			// Try to save any pending changes
+			// Note: IndexedDB operations are async and might not complete before unload
+			// but this is the best we can do without a backend server (V1)
+			if (pendingSaveRef.current) {
+				void forceSave();
 			}
 		};
 
@@ -140,7 +130,7 @@ export function useAutoSave({
 				clearTimeout(timeoutRef.current);
 			}
 		};
-	}, [boardId, elements, forceSave]);
+	}, [forceSave]);
 
 	// Cleanup on unmount
 	useEffect(() => {
