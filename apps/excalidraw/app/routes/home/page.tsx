@@ -53,7 +53,23 @@ export default function Page() {
 				subscription = boardObservable.subscribe({
 					next: (board) => {
 						if (board) {
-							setElements(board.elements || []);
+							const newElements = board.elements || [];
+							// Only update state if elements actually changed (by comparing IDs and length)
+							setElements((prevElements) => {
+								if (prevElements.length !== newElements.length) {
+									console.log('[Page] Elements changed: length', prevElements.length, '->', newElements.length);
+									return newElements;
+								}
+								// Quick check: compare IDs to see if array changed
+								const prevIds = prevElements.map(el => el.id).join(',');
+								const newIds = newElements.map((el: Element) => el.id).join(',');
+								if (prevIds !== newIds) {
+									console.log('[Page] Elements changed: IDs differ');
+									return newElements;
+								}
+								// No change, return previous array reference
+								return prevElements;
+							});
 						}
 						setIsReady(true);
 					},
@@ -77,21 +93,17 @@ export default function Page() {
 	}, []);
 
 	const handleElementCreate = useCallback(async (element: Element) => {
-		// Optimistic update
-		setElements((prev) => [...prev, element]);
-
+		// Note: No optimistic update needed - RxDB subscription handles state updates
+		// This prevents double re-renders (one from optimistic update, one from subscription)
 		try {
 			await addElementToBoard(DEFAULT_BOARD_ID, element);
 		} catch (err) {
 			console.error("Failed to save element:", err);
-			// Element still visible due to optimistic update
 		}
 	}, []);
 
 	const handleElementDelete = useCallback(async (elementId: string) => {
-		// Optimistic update
-		setElements((prev) => prev.filter((el) => el.id !== elementId));
-
+		// Note: No optimistic update needed - RxDB subscription handles state updates
 		try {
 			await deleteElementFromBoard(DEFAULT_BOARD_ID, elementId);
 		} catch (err) {

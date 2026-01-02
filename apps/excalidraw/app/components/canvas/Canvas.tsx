@@ -2,7 +2,7 @@
  * Main Canvas component for whiteboard drawing
  */
 
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, memo } from "react";
 import {
 	useCanvasEvents,
 	useCanvasSize,
@@ -71,8 +71,9 @@ function getCursorForTool(tool: Tool, isSelecting: boolean): string {
 
 /**
  * Whiteboard canvas with drawing capabilities
+ * Wrapped with React.memo to prevent unnecessary re-renders
  */
-export function Canvas({
+export const Canvas = memo(function CanvasComponent({
 	elements,
 	currentTool = "rectangle",
 	strokeWidth = 2,
@@ -96,11 +97,11 @@ export function Canvas({
 		};
 	}, []);
 
-	// Debug: Log re-renders
+	// Debug: Log re-renders with more detail
 	useEffect(() => {
 		renderCount++;
 		console.log(
-			`[Canvas Component] RENDERED (count: ${renderCount}, tool: ${currentTool})`,
+			`[Canvas Component] RENDERED (count: ${renderCount}, tool: ${currentTool}, elements: ${elements.length})`,
 		);
 	}, [currentTool, elements]);
 
@@ -125,21 +126,26 @@ export function Canvas({
 
 	const isShiftPressedRef = useRef(false);
 
-	// Update current tool and styles when props change
-	if (
-		drawingState.currentTool !== currentTool ||
-		drawingState.strokeWidth !== strokeWidth ||
-		drawingState.strokeColor !== strokeColor ||
-		drawingState.fillColor !== fillColor
-	) {
-		setDrawingState((prev) => ({
-			...prev,
-			currentTool: currentTool as ElementType,
-			strokeWidth,
-			strokeColor,
-			fillColor,
-		}));
-	}
+	// Sync drawing state with props (using useEffect to avoid setState during render)
+	useEffect(() => {
+		setDrawingState((prev) => {
+			if (
+				prev.currentTool !== currentTool ||
+				prev.strokeWidth !== strokeWidth ||
+				prev.strokeColor !== strokeColor ||
+				prev.fillColor !== fillColor
+			) {
+				return {
+					...prev,
+					currentTool: currentTool as ElementType,
+					strokeWidth,
+					strokeColor,
+					fillColor,
+				};
+			}
+			return prev;
+		});
+	}, [currentTool, strokeWidth, strokeColor, fillColor]);
 
 	// Clear selection when switching away from selection tool
 	useEffect(() => {
@@ -402,50 +408,60 @@ export function Canvas({
 				return;
 			}
 
-			setDrawingState((prev) => {
-				if (!prev.isDrawing || !prev.startPoint) return prev;
+			// Check if we're currently drawing - read from current drawingState closure
+			if (!drawingState.isDrawing || !drawingState.startPoint) {
+				console.log('[Canvas] handleDrawEnd called but not drawing');
+				return;
+			}
 
-				let element: Element | null = null;
+			// Create element BEFORE setState (synchronous)
+			let elementToCreate: Element | null = null;
 
-				if (
-					prev.currentTool === "pen" &&
-					prev.previewElement &&
-					prev.previewElement.points
-				) {
-					if (prev.previewElement.points.length > 1) {
-						element = {
-							...prev.previewElement,
-							id: generateElementId(),
-							points: prev.previewElement.points,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						};
-					}
-				} else {
-					element = createFinalElement(
-						prev.currentTool,
-						prev.startPoint,
-						point,
-						elements.length,
-						prev.strokeColor,
-						prev.fillColor,
-						prev.strokeWidth,
-					);
+			if (
+				drawingState.currentTool === "pen" &&
+				drawingState.previewElement &&
+				drawingState.previewElement.points
+			) {
+				if (drawingState.previewElement.points.length > 1) {
+					elementToCreate = {
+						...drawingState.previewElement,
+						id: generateElementId(),
+						points: drawingState.previewElement.points,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					};
+					console.log('[Canvas] Pen element created:', elementToCreate.id, 'points:', elementToCreate.points?.length);
 				}
-
-				if (element && onElementCreate) {
-					onElementCreate(element);
+			} else {
+				elementToCreate = createFinalElement(
+					drawingState.currentTool,
+					drawingState.startPoint,
+					point,
+					elements.length,
+					drawingState.strokeColor,
+					drawingState.fillColor,
+					drawingState.strokeWidth,
+				);
+				if (elementToCreate) {
+					console.log('[Canvas] Shape element created:', elementToCreate.id);
 				}
+			}
 
-				return {
-					...prev,
-					isDrawing: false,
-					startPoint: null,
-					previewElement: null,
-				};
-			});
+			// Reset drawing state
+			setDrawingState((prev) => ({
+				...prev,
+				isDrawing: false,
+				startPoint: null,
+				previewElement: null,
+			}));
+
+			// Call onElementCreate AFTER reading state (synchronous call)
+			if (elementToCreate && onElementCreate) {
+				console.log('[Canvas] Calling onElementCreate for:', elementToCreate.id);
+				onElementCreate(elementToCreate);
+			}
 		},
-		[currentTool, elements, selection, onElementCreate, onSelectionChange],
+		[currentTool, elements, selection, drawingState, onElementCreate, onSelectionChange],
 	);
 
 	// Setup event handlers
@@ -592,7 +608,7 @@ export function Canvas({
 			}}
 		/>
 	);
-}
+});
 
 /** Simple rectangle rendering for selection */
 function drawSimpleRectangle(
