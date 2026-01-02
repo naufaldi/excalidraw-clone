@@ -81,3 +81,20 @@ export function getBoundingBox(
 export function generateElementId(): string {
 	return `el_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
+
+/**
+ * Get cursor style based on current tool
+ */
+export function getCursorForTool(tool: string, isSelecting: boolean): string {
+	if (isSelecting) return "crosshair";
+	switch (tool) {
+		case "selection":
+			return "default";
+		case "hand":
+			return "grab";
+		case "eraser":
+			return "crosshair";
+		default:
+			return "crosshair";
+	}
+}
