@@ -4,6 +4,7 @@
 
 import type { Element } from "../database/shared/types.js";
 import type { Viewport } from "./types.js";
+import type { BoundingBox } from "./selection.js";
 
 /**
  * Draw a rectangle element
@@ -217,4 +218,161 @@ export function clearCanvas(
 	height: number,
 ): void {
 	ctx.clearRect(0, 0, width, height);
+}
+
+/** Selection box color */
+const SELECTION_BOX_COLOR = "#3b82f6";
+const SELECTION_BOX_DASH = [4, 4];
+
+/** Resize handle size */
+const HANDLE_SIZE = 8;
+const HANDLE_COLOR = "#ffffff";
+const HANDLE_BORDER_COLOR = "#3b82f6";
+
+/**
+ * Render a selection rectangle (lasso/box select)
+ */
+export function renderSelectionBox(
+	ctx: CanvasRenderingContext2D,
+	box: BoundingBox,
+	viewport: Viewport,
+): void {
+	ctx.save();
+
+	ctx.translate(viewport.offsetX, viewport.offsetY);
+	ctx.scale(viewport.zoom, viewport.zoom);
+
+	ctx.strokeStyle = SELECTION_BOX_COLOR;
+	ctx.lineWidth = 1 / viewport.zoom;
+	ctx.setLineDash(SELECTION_BOX_DASH);
+
+	ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+	// Light fill
+	ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+	ctx.fillRect(box.x, box.y, box.width, box.height);
+
+	ctx.restore();
+}
+
+/**
+ * Get resize handles for a bounding box
+ */
+function getResizeHandles(
+	box: BoundingBox,
+): Map<string, { x: number; y: number }> {
+	const halfHandle = HANDLE_SIZE / 2;
+	const handles = new Map<string, { x: number; y: number }>();
+
+	// Corner handles
+	handles.set("nw", { x: box.x - halfHandle, y: box.y - halfHandle });
+	handles.set("ne", {
+		x: box.x + box.width - halfHandle,
+		y: box.y - halfHandle,
+	});
+	handles.set("sw", {
+		x: box.x - halfHandle,
+		y: box.y + box.height - halfHandle,
+	});
+	handles.set("se", {
+		x: box.x + box.width - halfHandle,
+		y: box.y + box.height - halfHandle,
+	});
+
+	// Edge handles
+	handles.set("n", {
+		x: box.x + box.width / 2 - halfHandle,
+		y: box.y - halfHandle,
+	});
+	handles.set("s", {
+		x: box.x + box.width / 2 - halfHandle,
+		y: box.y + box.height - halfHandle,
+	});
+	handles.set("e", {
+		x: box.x + box.width - halfHandle,
+		y: box.y + box.height / 2 - halfHandle,
+	});
+	handles.set("w", {
+		x: box.x - halfHandle,
+		y: box.y + box.height / 2 - halfHandle,
+	});
+
+	return handles;
+}
+
+/**
+ * Render resize handles for selected elements
+ */
+export function renderResizeHandles(
+	ctx: CanvasRenderingContext2D,
+	box: BoundingBox,
+	viewport: Viewport,
+): void {
+	ctx.save();
+
+	ctx.translate(viewport.offsetX, viewport.offsetY);
+	ctx.scale(viewport.zoom, viewport.zoom);
+
+	const handles = getResizeHandles(box);
+	const scaledHandleSize = HANDLE_SIZE / viewport.zoom;
+
+	for (const [, pos] of handles) {
+		// Fill
+		ctx.fillStyle = HANDLE_COLOR;
+		ctx.fillRect(pos.x, pos.y, scaledHandleSize, scaledHandleSize);
+
+		// Border
+		ctx.strokeStyle = HANDLE_BORDER_COLOR;
+		ctx.lineWidth = 1 / viewport.zoom;
+		ctx.strokeRect(pos.x, pos.y, scaledHandleSize, scaledHandleSize);
+	}
+
+	ctx.restore();
+}
+
+/**
+ * Render selection highlight for a single element
+ */
+export function renderSelectionHighlight(
+	ctx: CanvasRenderingContext2D,
+	box: BoundingBox,
+	viewport: Viewport,
+): void {
+	ctx.save();
+
+	ctx.translate(viewport.offsetX, viewport.offsetY);
+	ctx.scale(viewport.zoom, viewport.zoom);
+
+	// Dashed outline
+	ctx.strokeStyle = SELECTION_BOX_COLOR;
+	ctx.lineWidth = 1 / viewport.zoom;
+	ctx.setLineDash(SELECTION_BOX_DASH);
+	ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+	// Resize handles
+	renderResizeHandles(ctx, box, viewport);
+
+	ctx.restore();
+}
+
+/**
+ * Render selection highlights for multiple elements
+ */
+export function renderSelectionHighlights(
+	ctx: CanvasRenderingContext2D,
+	selectedIds: Set<string>,
+	elements: Element[],
+	viewport: Viewport,
+): void {
+	for (const element of elements) {
+		if (selectedIds.has(element.id)) {
+			const box = {
+				x: element.x,
+				y: element.y,
+				width: element.width ?? 0,
+				height: element.height ?? 0,
+			};
+			renderSelectionHighlight(ctx, box, viewport);
+		}
+	}
 }
