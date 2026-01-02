@@ -50,6 +50,31 @@ Moon toolchain is configured with a “single version policy” (`rootPackageOnl
 - Prefer predictable state transitions (command/event style) to enable undo/redo and sync later.
 - Performance: avoid per-frame React state updates; keep hot drawing loops outside React when possible.
 
+## Code Quality Principles (KISS, DRY, Reusability)
+
+- **KISS (Keep It Simple, Stupid)**: Avoid over-engineering. Each function/component should do one thing well.
+  - Prefer small, focused functions over monolithic handlers.
+  - Extract complex logic into custom hooks or utility modules.
+  - If a file exceeds ~200 lines, consider splitting it.
+
+- **DRY (Don't Repeat Yourself)**: Eliminate code duplication.
+  - Before writing new code, check if similar logic exists in `lib/` or `hooks/`.
+  - Shared rendering logic goes in `lib/canvas/renderer.ts`.
+  - Shared utilities go in `lib/canvas/utils.ts` or appropriate module.
+  - Element creation logic goes in `lib/canvas/element-factory.ts`.
+
+- **Reusability**: Design for composition and reuse.
+  - Extract reusable hooks to `hooks/` directory with single responsibility.
+  - Prefer pure functions over stateful code when possible.
+  - Use TypeScript interfaces for clear contracts between modules.
+
+- **Separation of Concerns**: Keep logic organized by responsibility.
+  - State management → Custom hooks (`useSelection`, `useDrawing`, etc.)
+  - Rendering → `lib/canvas/renderer.ts`
+  - Hit testing/selection → `lib/canvas/selection.ts`
+  - Element creation → `lib/canvas/element-factory.ts`
+  - Event handling → `hooks/canvas/use-canvas-events.ts`
+
 ## Frontend Folder Structure
 
 Use **feature-based structure** with:
