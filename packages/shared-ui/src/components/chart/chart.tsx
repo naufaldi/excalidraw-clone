@@ -103,14 +103,23 @@ const ChartTooltip = RechartsPrimitive.Tooltip;
 
 const ChartTooltipContent = React.forwardRef<
 	HTMLDivElement,
-	TooltipContentProps<any, any> & // Use correct type for custom tooltip content
-		React.ComponentProps<"div"> & {
-			hideLabel?: boolean;
-			hideIndicator?: boolean;
-			indicator?: "line" | "dot" | "dashed";
-			nameKey?: string;
-			labelKey?: string;
-		}
+	React.ComponentProps<"div"> & {
+		active?: boolean;
+		payload?: any[];
+		label?: string | number;
+		labelFormatter?: (
+			label: string | number,
+			payload: any[],
+		) => React.ReactNode;
+		labelClassName?: string;
+		formatter?: (value: any, name: string, item: any) => React.ReactNode;
+		color?: string;
+		hideLabel?: boolean;
+		hideIndicator?: boolean;
+		indicator?: "line" | "dot" | "dashed";
+		nameKey?: string;
+		labelKey?: string;
+	}
 >(
 	(
 		{
@@ -149,7 +158,7 @@ const ChartTooltipContent = React.forwardRef<
 			if (labelFormatter) {
 				return (
 					<div className={clx("font-medium", labelClassName)}>
-						{labelFormatter(value, payload)}
+						{labelFormatter(value as string | number, payload)}
 					</div>
 				);
 			}
@@ -200,7 +209,14 @@ const ChartTooltipContent = React.forwardRef<
 								)}
 							>
 								{formatter && item?.value !== undefined && item.name ? (
-									formatter(item.value, item.name, item, index, item.payload)
+									// biome-ignore lint/suspicious/noExplicitAny: formatter signature varies
+									(formatter as any)(
+										item.value,
+										item.name,
+										item,
+										index,
+										item.payload,
+									)
 								) : (
 									<>
 										{itemConfig?.icon ? (

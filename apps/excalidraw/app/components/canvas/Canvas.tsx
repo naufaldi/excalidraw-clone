@@ -3,15 +3,16 @@
  * Refactored to use custom hooks and shared renderer functions
  */
 
-import { useCallback, useRef, useEffect, memo } from "react";
+import type { Tool } from "@repo/shared-ui/components";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
 	useCanvasEvents,
 	useCanvasSize,
-	useDrawLoop,
-	useViewport,
-	useSelection,
 	useDrawing,
+	useDrawLoop,
 	usePan,
+	useSelection,
+	useViewport,
 } from "#hooks/canvas/index.js";
 import {
 	findElementsAtPoint,
@@ -20,9 +21,7 @@ import {
 	renderSelectionBox,
 	renderSelectionHighlights,
 } from "#lib/canvas/index.js";
-
 import type { Element, Point } from "#lib/database/shared/types.js";
-import type { Tool } from "@repo/shared-ui/components";
 
 interface CanvasProps {
 	elements: Element[];
@@ -66,6 +65,9 @@ export const Canvas = memo(function CanvasComponent({
 		onSelectionChange,
 	});
 
+	// Track shift key state for drawing constraints
+	const [isShiftPressed, setIsShiftPressed] = useState(false);
+
 	// Drawing hook
 	const {
 		drawingState,
@@ -79,6 +81,7 @@ export const Canvas = memo(function CanvasComponent({
 		strokeColor,
 		fillColor,
 		elementsCount: elements.length,
+		isShiftPressed,
 		onElementCreate,
 	});
 
@@ -101,13 +104,19 @@ export const Canvas = memo(function CanvasComponent({
 		}
 	}, [currentTool, selection.selectedIds.size, clearSelection]);
 
-	// Keyboard event handling for shift key
+	// Keyboard event handling for shift key (shared between selection and drawing)
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Shift") setShiftPressed(true);
+			if (e.key === "Shift") {
+				setShiftPressed(true);
+				setIsShiftPressed(true);
+			}
 		};
 		const handleKeyUp = (e: KeyboardEvent) => {
-			if (e.key === "Shift") setShiftPressed(false);
+			if (e.key === "Shift") {
+				setShiftPressed(false);
+				setIsShiftPressed(false);
+			}
 		};
 		window.addEventListener("keydown", handleKeyDown);
 		window.addEventListener("keyup", handleKeyUp);
@@ -139,7 +148,13 @@ export const Canvas = memo(function CanvasComponent({
 
 			handleDrawingStart(point);
 		},
-		[currentTool, elements, handleSelectionStart, handleDrawingStart, onElementDelete],
+		[
+			currentTool,
+			elements,
+			handleSelectionStart,
+			handleDrawingStart,
+			onElementDelete,
+		],
 	);
 
 	// Unified draw move handler
@@ -208,7 +223,12 @@ export const Canvas = memo(function CanvasComponent({
 
 			// Render selection highlights
 			if (selection.selectedIds.size > 0) {
-				renderSelectionHighlights(ctx, selection.selectedIds, elements, viewport);
+				renderSelectionHighlights(
+					ctx,
+					selection.selectedIds,
+					elements,
+					viewport,
+				);
 			}
 		},
 		[elements, drawingState.previewElement, selection, viewport],

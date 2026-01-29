@@ -3,16 +3,20 @@
  */
 
 import { useCallback, useState } from "react";
-import type { Element, ElementType, Point } from "../../lib/database/shared/types.js";
 import {
-	DEFAULT_DRAWING_STATE,
-	type DrawingState,
-	createPreviewElement,
 	createFinalElement,
 	createPenPreviewElement,
+	createPreviewElement,
 	createTextElement,
+	DEFAULT_DRAWING_STATE,
+	type DrawingState,
 	generateElementId,
 } from "../../lib/canvas/index.js";
+import type {
+	Element,
+	ElementType,
+	Point,
+} from "../../lib/database/shared/types.js";
 
 interface UseDrawingOptions {
 	currentTool: ElementType;
@@ -20,6 +24,7 @@ interface UseDrawingOptions {
 	strokeColor: string;
 	fillColor: string;
 	elementsCount: number;
+	isShiftPressed?: boolean;
 	onElementCreate?: (element: Element) => void;
 }
 
@@ -40,6 +45,7 @@ export function useDrawing({
 	strokeColor,
 	fillColor,
 	elementsCount,
+	isShiftPressed = false,
 	onElementCreate,
 }: UseDrawingOptions): UseDrawingReturn {
 	const [drawingState, setDrawingState] = useState<DrawingState>({
@@ -48,6 +54,7 @@ export function useDrawing({
 		strokeWidth,
 		strokeColor,
 		fillColor,
+		isShiftPressed,
 	});
 
 	// Sync drawing state with props
@@ -57,7 +64,8 @@ export function useDrawing({
 				prev.currentTool !== currentTool ||
 				prev.strokeWidth !== strokeWidth ||
 				prev.strokeColor !== strokeColor ||
-				prev.fillColor !== fillColor
+				prev.fillColor !== fillColor ||
+				prev.isShiftPressed !== isShiftPressed
 			) {
 				return {
 					...prev,
@@ -65,14 +73,37 @@ export function useDrawing({
 					strokeWidth,
 					strokeColor,
 					fillColor,
+					isShiftPressed,
 				};
 			}
 			return prev;
 		});
-	}, [currentTool, strokeWidth, strokeColor, fillColor]);
+	}, [currentTool, strokeWidth, strokeColor, fillColor, isShiftPressed]);
 
 	const handleDrawingStart = useCallback(
 		(point: Point) => {
+			// Handle two-click line drawing
+			if (
+				(currentTool === "line" || currentTool === "arrow") &&
+				!drawingState.isLineDrawing
+			) {
+				setDrawingState((prev) => ({
+					...prev,
+					isLineDrawing: true,
+					lineFirstPoint: point,
+					previewElement: createPreviewElement(
+						currentTool,
+						point,
+						point,
+						strokeColor,
+						fillColor,
+						strokeWidth,
+						isShiftPressed,
+					),
+				}));
+				return;
+			}
+
 			if (currentTool === "pen") {
 				const penElement = createPenPreviewElement(
 					point,
@@ -103,59 +134,109 @@ export function useDrawing({
 						strokeColor,
 						fillColor,
 						strokeWidth,
+						isShiftPressed,
 					),
 				}));
 			}
 		},
-		[currentTool, strokeColor, fillColor, strokeWidth, elementsCount, onElementCreate],
+		[
+			currentTool,
+			strokeColor,
+			fillColor,
+			strokeWidth,
+			elementsCount,
+			onElementCreate,
+			drawingState.isLineDrawing,
+			isShiftPressed,
+		],
 	);
 
-	const handleDrawingMove = useCallback(
-		(point: Point) => {
-			setDrawingState((prev) => {
-				if (!prev.isDrawing || !prev.startPoint) return prev;
-
-				if (
-					prev.currentTool === "pen" &&
-					prev.previewElement &&
-					prev.previewElement.points
-				) {
-					const lastPoint =
-						prev.previewElement.points[prev.previewElement.points.length - 1];
-					const distance = Math.sqrt(
-						(point.x - lastPoint.x) ** 2 + (point.y - lastPoint.y) ** 2,
-					);
-
-					if (distance > 2) {
-						return {
-							...prev,
-							previewElement: {
-								...prev.previewElement,
-								points: [...prev.previewElement.points, point],
-							},
-						};
-					}
-					return prev;
-				}
-
+	const handleDrawingMove = useCallback((point: Point) => {
+		setDrawingState((prev) => {
+			// Handle two-click line drawing preview
+			if (prev.isLineDrawing && prev.lineFirstPoint) {
 				return {
 					...prev,
 					previewElement: createPreviewElement(
 						prev.currentTool,
-						prev.startPoint,
+						prev.lineFirstPoint,
 						point,
 						prev.strokeColor,
 						prev.fillColor,
 						prev.strokeWidth,
+						prev.isShiftPressed,
 					),
 				};
-			});
-		},
-		[],
-	);
+			}
+
+			if (!prev.isDrawing || !prev.startPoint) return prev;
+
+			if (
+				prev.currentTool === "pen" &&
+				prev.previewElement &&
+				prev.previewElement.points
+			) {
+				const lastPoint =
+					prev.previewElement.points[prev.previewElement.points.length - 1];
+				const distance = Math.sqrt(
+					(point.x - lastPoint.x) ** 2 + (point.y - lastPoint.y) ** 2,
+				);
+
+				if (distance > 2) {
+					return {
+						...prev,
+						previewElement: {
+							...prev.previewElement,
+							points: [...prev.previewElement.points, point],
+						},
+					};
+				}
+				return prev;
+			}
+
+			return {
+				...prev,
+				previewElement: createPreviewElement(
+					prev.currentTool,
+					prev.startPoint,
+					point,
+					prev.strokeColor,
+					prev.fillColor,
+					prev.strokeWidth,
+					prev.isShiftPressed,
+				),
+			};
+		});
+	}, []);
 
 	const handleDrawingEnd = useCallback(
 		(point: Point) => {
+			// Handle two-click line drawing completion
+			if (drawingState.isLineDrawing && drawingState.lineFirstPoint) {
+				const elementToCreate = createFinalElement(
+					drawingState.currentTool,
+					drawingState.lineFirstPoint,
+					point,
+					elementsCount,
+					drawingState.strokeColor,
+					drawingState.fillColor,
+					drawingState.strokeWidth,
+					drawingState.isShiftPressed,
+				);
+
+				setDrawingState((prev) => ({
+					...prev,
+					isLineDrawing: false,
+					lineFirstPoint: null,
+					previewElement: null,
+				}));
+
+				if (elementToCreate && onElementCreate) {
+					onElementCreate(elementToCreate);
+				}
+				return;
+			}
+
 			if (!drawingState.isDrawing || !drawingState.startPoint) {
 				return;
 			}
@@ -185,6 +266,7 @@ export function useDrawing({
 					drawingState.strokeColor,
 					drawingState.fillColor,
 					drawingState.strokeWidth,
+					drawingState.isShiftPressed,
 				);
 			}
 

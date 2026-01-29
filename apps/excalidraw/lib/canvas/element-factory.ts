@@ -3,7 +3,7 @@
  */
 
 import type { Element, ElementType, Point } from "../database/shared/types.js";
-import { getBoundingBox, generateElementId } from "./utils.js";
+import { generateElementId, getBoundingBox } from "./utils.js";
 
 /**
  * Create a preview element during drawing
@@ -15,9 +15,68 @@ export function createPreviewElement(
 	strokeColor: string,
 	fillColor: string,
 	strokeWidth: number,
+	isShiftPressed = false,
 ): Element {
-	const { x, y, width, height } = getBoundingBox(start, end);
 	const now = new Date();
+
+	// Handle constrained shapes (squares, perfect circles)
+	if (isShiftPressed && (tool === "rectangle" || tool === "circle")) {
+		const dx = end.x - start.x;
+		const dy = end.y - start.y;
+		const size = Math.max(Math.abs(dx), Math.abs(dy));
+		const constrainedEnd = {
+			x: start.x + (dx >= 0 ? size : -size),
+			y: start.y + (dy >= 0 ? size : -size),
+		};
+		const { x, y, width, height } = getBoundingBox(start, constrainedEnd);
+
+		const base: Element = {
+			id: "preview",
+			type: tool,
+			x,
+			y,
+			width,
+			height,
+			strokeColor,
+			fillColor,
+			strokeWidth,
+			opacity: 1,
+			zIndex: 999999,
+			createdAt: now,
+			updatedAt: now,
+		};
+
+		return base;
+	}
+
+	// Handle center-based circle drawing
+	if (tool === "circle") {
+		const dx = end.x - start.x;
+		const dy = end.y - start.y;
+		const radius = Math.sqrt(dx * dx + dy * dy);
+		const { x, y, width, height } = getBoundingBox(
+			{ x: start.x - radius, y: start.y - radius },
+			{ x: start.x + radius, y: start.y + radius },
+		);
+
+		return {
+			id: "preview",
+			type: tool,
+			x,
+			y,
+			width,
+			height,
+			strokeColor,
+			fillColor,
+			strokeWidth,
+			opacity: 1,
+			zIndex: 999999,
+			createdAt: now,
+			updatedAt: now,
+		};
+	}
+
+	const { x, y, width, height } = getBoundingBox(start, end);
 
 	const base: Element = {
 		id: "preview",
@@ -59,14 +118,79 @@ export function createFinalElement(
 	strokeColor: string,
 	fillColor: string,
 	strokeWidth: number,
+	isShiftPressed = false,
 ): Element | null {
+	const now = new Date();
+
+	// Handle constrained shapes (squares, perfect circles)
+	if (isShiftPressed && (tool === "rectangle" || tool === "circle")) {
+		const dx = end.x - start.x;
+		const dy = end.y - start.y;
+		const size = Math.max(Math.abs(dx), Math.abs(dy));
+		const constrainedEnd = {
+			x: start.x + (dx >= 0 ? size : -size),
+			y: start.y + (dy >= 0 ? size : -size),
+		};
+		const { x, y, width, height } = getBoundingBox(start, constrainedEnd);
+
+		if (width < 5 && height < 5) {
+			return null;
+		}
+
+		return {
+			id: generateElementId(),
+			type: tool,
+			x,
+			y,
+			width,
+			height,
+			strokeColor,
+			fillColor,
+			strokeWidth,
+			opacity: 1,
+			zIndex,
+			createdAt: now,
+			updatedAt: now,
+		};
+	}
+
+	// Handle center-based circle drawing
+	if (tool === "circle") {
+		const dx = end.x - start.x;
+		const dy = end.y - start.y;
+		const radius = Math.sqrt(dx * dx + dy * dy);
+
+		if (radius < 5) {
+			return null;
+		}
+
+		const { x, y, width, height } = getBoundingBox(
+			{ x: start.x - radius, y: start.y - radius },
+			{ x: start.x + radius, y: start.y + radius },
+		);
+
+		return {
+			id: generateElementId(),
+			type: tool,
+			x,
+			y,
+			width,
+			height,
+			strokeColor,
+			fillColor,
+			strokeWidth,
+			opacity: 1,
+			zIndex,
+			createdAt: now,
+			updatedAt: now,
+		};
+	}
+
 	const { x, y, width, height } = getBoundingBox(start, end);
 
 	if (width < 5 && height < 5) {
 		return null;
 	}
-
-	const now = new Date();
 
 	const base: Element = {
 		id: generateElementId(),
@@ -125,10 +249,7 @@ export function createPenPreviewElement(
 /**
  * Create a text element at the given point
  */
-export function createTextElement(
-	point: Point,
-	zIndex: number,
-): Element {
+export function createTextElement(point: Point, zIndex: number): Element {
 	return {
 		id: generateElementId(),
 		type: "text",

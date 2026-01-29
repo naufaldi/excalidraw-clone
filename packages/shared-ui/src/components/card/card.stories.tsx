@@ -32,10 +32,10 @@ import {
 
 const FormSchema = z.object({
 	projectName: z.string({
-		required_error: "Project name is required.",
+		message: "Project name is required.",
 	}),
 	framework: z.string({
-		required_error: "Please select a framework.",
+		message: "Please select a framework.",
 	}),
 });
 

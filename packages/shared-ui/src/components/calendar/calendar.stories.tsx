@@ -56,7 +56,7 @@ export const SimpleCalendar: StoryObj = {
 
 const FormSchema = z.object({
 	dob: z.date({
-		required_error: "A date of birth is required.",
+		message: "A date of birth is required.",
 	}),
 });
 

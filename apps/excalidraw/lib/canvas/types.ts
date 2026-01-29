@@ -24,6 +24,10 @@ export interface DrawingState {
 	strokeWidth: number;
 	strokeColor: string;
 	fillColor: string;
+	isShiftPressed: boolean;
+	// Two-click line drawing state
+	lineFirstPoint: Point | null;
+	isLineDrawing: boolean;
 }
 
 /**
@@ -55,4 +59,7 @@ export const DEFAULT_DRAWING_STATE: DrawingState = {
 	strokeWidth: 2,
 	strokeColor: "var(--stroke-primary)",
 	fillColor: "var(--fill-transparent)",
+	isShiftPressed: false,
+	lineFirstPoint: null,
+	isLineDrawing: false,
 };
