@@ -39,10 +39,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can work with it individually without affecting other elements.
 
 **Acceptance Criteria:**
-- [ ] Clicking on an element selects only that element
-- [ ] Clicking on empty canvas deselects all
-- [ ] Shift+click adds/removes elements from multi-selection
-- [ ] Selection shows clear visual indicator (handles, outline)
+- [x] Clicking on an element selects only that element
+- [x] Clicking on empty canvas deselects all
+- [x] Shift+click adds/removes elements from multi-selection
+- [x] Selection shows clear visual indicator (handles, outline)
 
 ### US-2: Independent Element Deletion
 **As a** user,  
@@ -50,10 +50,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can remove mistakes or unwanted elements freely.
 
 **Acceptance Criteria:**
-- [ ] Pressing Delete/Backspace removes only selected elements
-- [ ] Using eraser tool removes only the element under cursor
-- [ ] Deletion is instant and visual feedback is clear
-- [ ] Undo restores deleted elements in their original position
+- [x] Pressing Delete/Backspace removes only selected elements
+- [x] Using eraser tool removes only the element under cursor
+- [x] Deletion is instant and visual feedback is clear
+- [x] Undo restores deleted elements in their original position
 
 ### US-3: Independent Element Movement
 **As a** user,  
@@ -61,10 +61,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can reposition elements without disturbing the canvas layout.
 
 **Acceptance Criteria:**
-- [ ] Dragging a selected element moves only that element
-- [ ] Multi-selected elements move together as a group
-- [ ] Movement is smooth (60fps) during drag
-- [ ] Elements snap to grid (if enabled)
+- [x] Dragging a selected element moves only that element
+- [x] Multi-selected elements move together as a group
+- [x] Movement is smooth (60fps) during drag
+- [x] Elements snap to grid (if enabled)
 
 ### US-4: Independent Element Editing
 **As a** user,  
@@ -72,9 +72,9 @@ Each element should be a **first-class, independent entity**:
 **So that** I can customize individual elements.
 
 **Acceptance Criteria:**
-- [ ] Property changes apply only to selected elements
-- [ ] Multi-selection allows bulk property changes
-- [ ] Changes are persisted immediately to RxDB
+- [x] Property changes apply only to selected elements
+- [x] Multi-selection allows bulk property changes
+- [x] Changes are persisted immediately to RxDB
 
 ### US-5: Independent Element Resize/Rotate
 **As a** user,  
@@ -104,10 +104,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can control which elements appear in front/behind.
 
 **Acceptance Criteria:**
-- [ ] "Bring to Front" moves selected to highest zIndex
-- [ ] "Send to Back" moves selected to lowest zIndex
-- [ ] "Bring Forward" / "Send Backward" for incremental changes
-- [ ] Visual feedback shows layer order changes
+- [ ] "Bring to Front" moves selected to highest zIndex (Database ready, UI controls needed)
+- [ ] "Send to Back" moves selected to lowest zIndex (Database ready, UI controls needed)
+- [ ] "Bring Forward" / "Send Backward" for incremental changes (Database ready, UI controls needed)
+- [ ] Visual feedback shows layer order changes (Database ready, UI controls needed)
 
 ---
 
