@@ -6,18 +6,18 @@
  */
 
 // Type exports
-export type * from './types.js';
+export type * from './types.js'
 
 // Schema exports
-export type * from './schema.js';
+export type * from './schema.js'
 
 // Individual schema exports
-export { elementSchema, boardSchema, userPreferencesSchema } from './schema.js';
-export { databaseSchemas, SCHEMA_VERSIONS } from './schema.js';
+export { elementSchema, boardSchema, userPreferencesSchema } from './schema.js'
+export { databaseSchemas, SCHEMA_VERSIONS } from './schema.js'
 export {
   validateBoardVersion,
   createDefaultBoard,
   createDefaultPreferences,
   getAllSchemas,
   getSchemaByCollection,
-} from './schema.js';
+} from './schema.js'

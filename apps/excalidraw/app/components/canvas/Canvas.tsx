@@ -10,6 +10,7 @@ import {
 	useCanvasSize,
 	useDrawing,
 	useDrawLoop,
+	useElementDrag,
 	usePan,
 	useSelection,
 	useViewport,
@@ -32,6 +33,7 @@ interface CanvasProps {
 	onElementCreate?: (element: Element) => void;
 	onSelectionChange?: (selectedIds: Set<string>) => void;
 	onElementDelete?: (elementId: string) => void;
+	onElementsMove?: (movedElements: Element[]) => void;
 }
 
 /**
@@ -47,6 +49,7 @@ export const Canvas = memo(function CanvasComponent({
 	onElementCreate,
 	onSelectionChange,
 	onElementDelete,
+	onElementsMove,
 }: CanvasProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const { width, height } = useCanvasSize();
@@ -67,6 +70,14 @@ export const Canvas = memo(function CanvasComponent({
 
 	// Track shift key state for drawing constraints
 	const [isShiftPressed, setIsShiftPressed] = useState(false);
+
+	// Element drag hook
+	const { dragState, handleDragStart, handleDragMove, handleDragEnd } =
+		useElementDrag({
+			elements,
+			selectedIds: selection.selectedIds,
+			onElementsMove,
+		});
 
 	// Drawing hook
 	const {
@@ -130,6 +141,16 @@ export const Canvas = memo(function CanvasComponent({
 	const handleDrawStart = useCallback(
 		(point: Point) => {
 			if (currentTool === "selection") {
+				// Check if clicking on an already selected element to start drag
+				const hitElements = findElementsAtPoint(elements, point);
+				const hitElement = hitElements[0];
+
+				if (hitElement && selection.selectedIds.has(hitElement.id)) {
+					// Start dragging selected elements
+					handleDragStart(point);
+					return;
+				}
+
 				handleSelectionStart(point);
 				return;
 			}
@@ -151,7 +172,9 @@ export const Canvas = memo(function CanvasComponent({
 		[
 			currentTool,
 			elements,
+			selection.selectedIds,
 			handleSelectionStart,
+			handleDragStart,
 			handleDrawingStart,
 			onElementDelete,
 		],
@@ -161,26 +184,46 @@ export const Canvas = memo(function CanvasComponent({
 	const handleDrawMove = useCallback(
 		(point: Point) => {
 			if (currentTool === "selection") {
+				if (dragState.isDragging) {
+					handleDragMove(point);
+					return;
+				}
 				handleSelectionMove(point);
 				return;
 			}
 
 			handleDrawingMove(point);
 		},
-		[currentTool, handleSelectionMove, handleDrawingMove],
+		[
+			currentTool,
+			dragState.isDragging,
+			handleDragMove,
+			handleSelectionMove,
+			handleDrawingMove,
+		],
 	);
 
 	// Unified draw end handler
 	const handleDrawEnd = useCallback(
 		(point: Point) => {
 			if (currentTool === "selection") {
+				if (dragState.isDragging) {
+					handleDragEnd();
+					return;
+				}
 				handleSelectionEnd(point);
 				return;
 			}
 
 			handleDrawingEnd(point);
 		},
-		[currentTool, handleSelectionEnd, handleDrawingEnd],
+		[
+			currentTool,
+			dragState.isDragging,
+			handleDragEnd,
+			handleSelectionEnd,
+			handleDrawingEnd,
+		],
 	);
 
 	// Setup event handlers
@@ -199,12 +242,27 @@ export const Canvas = memo(function CanvasComponent({
 			// Render elements
 			const sortedElements = [...elements].sort((a, b) => a.zIndex - b.zIndex);
 			for (const element of sortedElements) {
+				// Skip selected elements when dragging (we render them separately)
+				if (dragState.isDragging && selection.selectedIds.has(element.id)) {
+					continue;
+				}
 				if (selection.selectedIds.has(element.id)) continue;
 				ctx.save();
 				ctx.translate(viewport.offsetX, viewport.offsetY);
 				ctx.scale(viewport.zoom, viewport.zoom);
 				renderElement(ctx, element);
 				ctx.restore();
+			}
+
+			// Render dragged elements at their preview positions
+			if (dragState.isDragging) {
+				for (const el of dragState.draggedElements) {
+					ctx.save();
+					ctx.translate(viewport.offsetX, viewport.offsetY);
+					ctx.scale(viewport.zoom, viewport.zoom);
+					renderElement(ctx, el);
+					ctx.restore();
+				}
 			}
 
 			// Render preview element
@@ -221,17 +279,20 @@ export const Canvas = memo(function CanvasComponent({
 				renderSelectionBox(ctx, selection.selectionBox, viewport);
 			}
 
-			// Render selection highlights
+			// Render selection highlights (use dragged positions if dragging)
 			if (selection.selectedIds.size > 0) {
+				const elementsForHighlight = dragState.isDragging
+					? dragState.draggedElements
+					: elements.filter((el) => selection.selectedIds.has(el.id));
 				renderSelectionHighlights(
 					ctx,
 					selection.selectedIds,
-					elements,
+					dragState.isDragging ? elementsForHighlight : elements,
 					viewport,
 				);
 			}
 		},
-		[elements, drawingState.previewElement, selection, viewport],
+		[elements, drawingState.previewElement, selection, viewport, dragState],
 	);
 
 	// Setup render loop

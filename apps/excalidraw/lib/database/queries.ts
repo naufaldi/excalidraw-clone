@@ -13,11 +13,11 @@ const LAST_WRITE_TIME_FIELD = "_meta.lwt" as const;
  * Returns an observable that updates when boards change
  */
 export function getAllBoardsQuery() {
-  const collection = getBoardsCollection();
-  return collection
-    .find()
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
-    .exec();
+	const collection = getBoardsCollection();
+	return collection
+		.find()
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+		.exec();
 }
 
 /**
@@ -25,8 +25,8 @@ export function getAllBoardsQuery() {
  * Returns an observable that updates when the board changes
  */
 export function getBoardByIdQuery(boardId: string) {
-  const collection = getBoardsCollection();
-  return collection.findOne({ selector: { id: boardId } }).exec();
+	const collection = getBoardsCollection();
+	return collection.findOne({ selector: { id: boardId } }).exec();
 }
 
 /**
@@ -34,12 +34,12 @@ export function getBoardByIdQuery(boardId: string) {
  * Returns boards sorted by update time (most recent first)
  */
 export function getRecentBoardsQuery(limit: number = 10) {
-  const collection = getBoardsCollection();
-  return collection
-    .find()
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
-    .limit(limit)
-    .exec();
+	const collection = getBoardsCollection();
+	return collection
+		.find()
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+		.limit(limit)
+		.exec();
 }
 
 /**
@@ -47,15 +47,15 @@ export function getRecentBoardsQuery(limit: number = 10) {
  * Case-insensitive search on board names
  */
 export function searchBoardsQuery(searchTerm: string) {
-  const collection = getBoardsCollection();
-  return collection
-    .find({
-      selector: {
-        name: { $regex: `(?i)${searchTerm}` },
-      },
-    })
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
-    .exec();
+	const collection = getBoardsCollection();
+	return collection
+		.find({
+			selector: {
+				name: { $regex: `(?i)${searchTerm}` },
+			},
+		})
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+		.exec();
 }
 
 /**
@@ -63,8 +63,8 @@ export function searchBoardsQuery(searchTerm: string) {
  * Returns the global user preferences document
  */
 export function getUserPreferencesQuery() {
-  const collection = getPreferencesCollection();
-  return collection.findOne({ selector: { id: "global" } }).exec();
+	const collection = getPreferencesCollection();
+	return collection.findOne({ selector: { id: "global" } }).exec();
 }
 
 /**
@@ -72,11 +72,11 @@ export function getUserPreferencesQuery() {
  * Returns an observable count that updates when boards change
  */
 export function getBoardCountQuery() {
-  const collection = getBoardsCollection();
-  return collection
-    .count()
-    .exec()
-    .then((count) => count);
+	const collection = getBoardsCollection();
+	return collection
+		.count()
+		.exec()
+		.then((count) => count);
 }
 
 /**
@@ -84,18 +84,18 @@ export function getBoardCountQuery() {
  * Useful for analytics (e.g., boards with 0-10, 10-50, 50+ elements)
  */
 export function getBoardsByElementCountRange(min: number, max: number) {
-  const collection = getBoardsCollection();
-  return collection
-    .find({
-      selector: {},
-    })
-    .exec()
-    .then((docs) =>
-      docs.filter((doc) => {
-        const elementCount = doc.elements.length;
-        return elementCount >= min && elementCount <= max;
-      }),
-    );
+	const collection = getBoardsCollection();
+	return collection
+		.find({
+			selector: {},
+		})
+		.exec()
+		.then((docs) =>
+			docs.filter((doc) => {
+				const elementCount = doc.elements.length;
+				return elementCount >= min && elementCount <= max;
+			}),
+		);
 }
 
 /**
@@ -103,20 +103,20 @@ export function getBoardsByElementCountRange(min: number, max: number) {
  * Returns a query that can be re-executed with new parameters
  */
 export function createBoardsQuery(options: QueryOptions = {}) {
-  const collection = getBoardsCollection();
-  let query = collection
-    .find()
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any);
+	const collection = getBoardsCollection();
+	let query = collection
+		.find()
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any);
 
-  if (options.limit) {
-    query = query.limit(options.limit);
-  }
+	if (options.limit) {
+		query = query.limit(options.limit);
+	}
 
-  if (options.skip) {
-    query = query.skip(options.skip);
-  }
+	if (options.skip) {
+		query = query.skip(options.skip);
+	}
 
-  return query.exec();
+	return query.exec();
 }
 
 /**
@@ -124,14 +124,14 @@ export function createBoardsQuery(options: QueryOptions = {}) {
  * Useful for showing only recent boards
  */
 export function getBoardsCreatedAfter(date: Date) {
-  const collection = getBoardsCollection();
-  const since = date.getTime();
-  return collection
-    .find({
-      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
-    })
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
-    .exec();
+	const collection = getBoardsCollection();
+	const since = date.getTime();
+	return collection
+		.find({
+			selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
+		})
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+		.exec();
 }
 
 /**
@@ -139,14 +139,14 @@ export function getBoardsCreatedAfter(date: Date) {
  * Useful for sync scenarios
  */
 export function getBoardsUpdatedAfter(date: Date) {
-  const collection = getBoardsCollection();
-  const since = date.getTime();
-  return collection
-    .find({
-      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
-    })
-    .sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
-    .exec();
+	const collection = getBoardsCollection();
+	const since = date.getTime();
+	return collection
+		.find({
+			selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
+		})
+		.sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any)
+		.exec();
 }
 
 /**
@@ -154,17 +154,17 @@ export function getBoardsUpdatedAfter(date: Date) {
  * Useful for filtering boards that contain certain types of elements
  */
 export function getBoardsWithElementType(elementType: string) {
-  const collection = getBoardsCollection();
-  return collection
-    .find({
-      selector: {},
-    })
-    .exec()
-    .then((docs) =>
-      docs.filter((doc) =>
-        doc.elements.some((el: any) => el.type === elementType),
-      ),
-    );
+	const collection = getBoardsCollection();
+	return collection
+		.find({
+			selector: {},
+		})
+		.exec()
+		.then((docs) =>
+			docs.filter((doc) =>
+				doc.elements.some((el: any) => el.type === elementType),
+			),
+		);
 }
 
 /**
@@ -172,17 +172,17 @@ export function getBoardsWithElementType(elementType: string) {
  * Note: In V1-V3, elements are embedded in the board document
  */
 export function getElementFromBoard(
-  boardId: string,
-  elementId: string,
+	boardId: string,
+	elementId: string,
 ): Promise<any> {
-  return getBoardByIdQuery(boardId).then((boardDoc) => {
-    if (!boardDoc) {
-      return null;
-    }
+	return getBoardByIdQuery(boardId).then((boardDoc) => {
+		if (!boardDoc) {
+			return null;
+		}
 
-    const element = boardDoc.elements.find((el: any) => el.id === elementId);
-    return element || null;
-  });
+		const element = boardDoc.elements.find((el: any) => el.id === elementId);
+		return element || null;
+	});
 }
 
 /**
@@ -190,9 +190,9 @@ export function getElementFromBoard(
  * Strips RxDB document wrapper for serialization
  */
 export function getAllBoardsPlain(): Promise<Board[]> {
-  return getAllBoardsQuery().then((docs) =>
-    docs.map((doc) => doc.toJSON() as Board),
-  );
+	return getAllBoardsQuery().then((docs) =>
+		docs.map((doc) => doc.toJSON() as Board),
+	);
 }
 
 /**
@@ -200,7 +200,7 @@ export function getAllBoardsPlain(): Promise<Board[]> {
  * Returns a function that can be called to get the current count
  */
 export function createBoardCountObservable() {
-  return getBoardCountQuery();
+	return getBoardCountQuery();
 }
 
 /**
@@ -208,8 +208,8 @@ export function createBoardCountObservable() {
  * Returns a query that emits new results when data changes
  */
 export function createLiveBoardsQuery() {
-  const collection = getBoardsCollection();
-  return collection.find().sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any).$; // $ returns an observable
+	const collection = getBoardsCollection();
+	return collection.find().sort({ [LAST_WRITE_TIME_FIELD]: "desc" } as any).$; // $ returns an observable
 }
 
 /**
@@ -217,8 +217,8 @@ export function createLiveBoardsQuery() {
  * Returns an observable that emits the board document
  */
 export function createLiveBoardQuery(boardId: string) {
-  const collection = getBoardsCollection();
-  return collection.findOne({ selector: { id: boardId } }).$;
+	const collection = getBoardsCollection();
+	return collection.findOne({ selector: { id: boardId } }).$;
 }
 
 /**
@@ -226,8 +226,8 @@ export function createLiveBoardQuery(boardId: string) {
  * Returns an observable that emits preferences changes
  */
 export function createLivePreferencesQuery() {
-  const collection = getPreferencesCollection();
-  return collection.findOne({ selector: { id: "global" } }).$;
+	const collection = getPreferencesCollection();
+	return collection.findOne({ selector: { id: "global" } }).$;
 }
 
 /**
@@ -235,13 +235,13 @@ export function createLivePreferencesQuery() {
  * Returns boards modified after last sync
  */
 export function getBoardsForSync(lastSyncTime: Date) {
-  const collection = getBoardsCollection();
-  const since = lastSyncTime.getTime();
-  return collection
-    .find({
-      selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
-    })
-    .exec();
+	const collection = getBoardsCollection();
+	const since = lastSyncTime.getTime();
+	return collection
+		.find({
+			selector: { [LAST_WRITE_TIME_FIELD]: { $gt: since } } as any,
+		})
+		.exec();
 }
 
 /**
@@ -249,19 +249,19 @@ export function getBoardsForSync(lastSyncTime: Date) {
  * Useful for performance monitoring
  */
 export function getBoardsWithMostElements(limit: number = 10) {
-  const collection = getBoardsCollection();
-  return collection
-    .find()
-    .exec()
-    .then((docs) =>
-      docs
-        .map((doc) => ({
-          ...doc.toJSON(),
-          elementCount: doc.elements.length,
-        }))
-        .sort((a, b) => b.elementCount - a.elementCount)
-        .slice(0, limit),
-    );
+	const collection = getBoardsCollection();
+	return collection
+		.find()
+		.exec()
+		.then((docs) =>
+			docs
+				.map((doc) => ({
+					...doc.toJSON(),
+					elementCount: doc.elements.length,
+				}))
+				.sort((a, b) => b.elementCount - a.elementCount)
+				.slice(0, limit),
+		);
 }
 
 /**
@@ -269,17 +269,17 @@ export function getBoardsWithMostElements(limit: number = 10) {
  * Returns counts of different element types across all boards
  */
 export function getElementStatistics(): Promise<Record<string, number>> {
-  return getAllBoardsQuery().then((docs) => {
-    const stats: Record<string, number> = {};
+	return getAllBoardsQuery().then((docs) => {
+		const stats: Record<string, number> = {};
 
-    docs.forEach((doc) => {
-      doc.elements.forEach((element: any) => {
-        stats[element.type] = (stats[element.type] || 0) + 1;
-      });
-    });
+		docs.forEach((doc) => {
+			doc.elements.forEach((element: any) => {
+				stats[element.type] = (stats[element.type] || 0) + 1;
+			});
+		});
 
-    return stats;
-  });
+		return stats;
+	});
 }
 
 /**
@@ -287,20 +287,20 @@ export function getElementStatistics(): Promise<Record<string, number>> {
  * Generic function for custom queries
  */
 export function createCustomQuery(selector: any, options: any = {}) {
-  const collection = getBoardsCollection();
-  let query = collection.find({ selector });
+	const collection = getBoardsCollection();
+	let query = collection.find({ selector });
 
-  if (options.sort) {
-    query = query.sort(options.sort);
-  }
+	if (options.sort) {
+		query = query.sort(options.sort);
+	}
 
-  if (options.limit) {
-    query = query.limit(options.limit);
-  }
+	if (options.limit) {
+		query = query.limit(options.limit);
+	}
 
-  if (options.skip) {
-    query = query.skip(options.skip);
-  }
+	if (options.skip) {
+		query = query.skip(options.skip);
+	}
 
-  return query.exec();
+	return query.exec();
 }

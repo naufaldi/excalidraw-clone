@@ -6,10 +6,13 @@ import {
 	createBoard,
 	createLiveBoardQuery,
 	deleteElementFromBoard,
+	deleteMultipleElementsFromBoard,
 	getBoardByIdQuery,
 	initializeDatabase,
+	updateMultipleElementsInBoard,
 } from "#lib/database/index.js";
 import { useAutoSave } from "#hooks/useAutoSave.js";
+import { useKeyboardShortcuts } from "#hooks/useKeyboardShortcuts.js";
 import type { Element } from "#lib/database/shared/types.js";
 import type { Route } from "./+types/page";
 
@@ -30,6 +33,7 @@ export default function Page() {
 	const [fillColor, setFillColor] = useState("var(--fill-transparent)");
 	const [isReady, setIsReady] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
 	// Initialize database and subscribe to board
 	useEffect(() => {
@@ -57,14 +61,21 @@ export default function Page() {
 							// Only update state if elements actually changed (by comparing IDs and length)
 							setElements((prevElements) => {
 								if (prevElements.length !== newElements.length) {
-									console.log('[Page] Elements changed: length', prevElements.length, '->', newElements.length);
+									console.log(
+										"[Page] Elements changed: length",
+										prevElements.length,
+										"->",
+										newElements.length,
+									);
 									return newElements;
 								}
 								// Quick check: compare IDs to see if array changed
-								const prevIds = prevElements.map(el => el.id).join(',');
-								const newIds = newElements.map((el: Element) => el.id).join(',');
+								const prevIds = prevElements.map((el) => el.id).join(",");
+								const newIds = newElements
+									.map((el: Element) => el.id)
+									.join(",");
 								if (prevIds !== newIds) {
-									console.log('[Page] Elements changed: IDs differ');
+									console.log("[Page] Elements changed: IDs differ");
 									return newElements;
 								}
 								// No change, return previous array reference
@@ -110,6 +121,49 @@ export default function Page() {
 			console.error("Failed to delete element:", err);
 		}
 	}, []);
+
+	const handleSelectionChange = useCallback((ids: Set<string>) => {
+		setSelectedIds(ids);
+	}, []);
+
+	const handleDeleteSelected = useCallback(async () => {
+		if (selectedIds.size === 0) return;
+		try {
+			await deleteMultipleElementsFromBoard(
+				DEFAULT_BOARD_ID,
+				Array.from(selectedIds),
+			);
+			setSelectedIds(new Set());
+		} catch (err) {
+			console.error("Failed to delete selected elements:", err);
+		}
+	}, [selectedIds]);
+
+	const handleClearSelection = useCallback(() => {
+		setSelectedIds(new Set());
+	}, []);
+
+	const handleElementsMove = useCallback(async (movedElements: Element[]) => {
+		if (movedElements.length === 0) return;
+		try {
+			const updates = movedElements.map((el) => ({
+				id: el.id,
+				updates: { x: el.x, y: el.y },
+			}));
+			await updateMultipleElementsInBoard(DEFAULT_BOARD_ID, updates);
+		} catch (err) {
+			console.error("Failed to move elements:", err);
+		}
+	}, []);
+
+	// Keyboard shortcuts
+	useKeyboardShortcuts({
+		currentTool,
+		onToolSelect: setCurrentTool,
+		onDeleteSelected: handleDeleteSelected,
+		onClearSelection: handleClearSelection,
+		selectedIds,
+	});
 
 	// Auto-save
 	const { saveStatus, lastSaved } = useAutoSave({
@@ -225,6 +279,8 @@ export default function Page() {
 				fillColor={fillColor}
 				onElementCreate={handleElementCreate}
 				onElementDelete={handleElementDelete}
+				onSelectionChange={handleSelectionChange}
+				onElementsMove={handleElementsMove}
 			/>
 		</div>
 	);

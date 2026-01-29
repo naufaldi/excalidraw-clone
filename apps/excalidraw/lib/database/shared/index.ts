@@ -7,17 +7,17 @@
 
 // Schema exports
 export {
-  boardSchema,
-  boardMigrationStrategies,
-  createDefaultBoard,
-  createDefaultPreferences,
-  databaseSchemas,
-  elementSchema,
-  getAllSchemas,
-  getSchemaByCollection,
-  SCHEMA_VERSIONS,
-  userPreferencesSchema,
-  validateBoardVersion,
+	boardSchema,
+	boardMigrationStrategies,
+	createDefaultBoard,
+	createDefaultPreferences,
+	databaseSchemas,
+	elementSchema,
+	getAllSchemas,
+	getSchemaByCollection,
+	SCHEMA_VERSIONS,
+	userPreferencesSchema,
+	validateBoardVersion,
 } from "./schema.js";
 // Type exports
 export type * from "./types.js";

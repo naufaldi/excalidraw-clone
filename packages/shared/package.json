@@ -1,26 +1,26 @@
 {
-  "name": "@repo/shared",
-  "private": true,
-  "type": "module",
-  "version": "0.0.1",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    "./database": "./src/database/index.ts"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsc -w",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome lint . --write",
-    "check": "biome check . --write"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "catalog:",
-    "typescript": "catalog:"
-  },
-  "dependencies": {
-    "rxdb": "^16.21.1"
-  }
+    "name": "@repo/shared",
+    "private": true,
+    "type": "module",
+    "version": "0.0.1",
+    "files": [
+        "dist"
+    ],
+    "exports": {
+        "./database": "./src/database/index.ts"
+    },
+    "scripts": {
+        "build": "tsc -p tsconfig.json",
+        "dev": "tsc -w",
+        "typecheck": "tsc --noEmit",
+        "lint": "biome lint . --write",
+        "check": "biome check . --write"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "catalog:",
+        "typescript": "catalog:"
+    },
+    "dependencies": {
+        "rxdb": "^16.21.1"
+    }
 }

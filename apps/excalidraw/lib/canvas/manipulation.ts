@@ -5,10 +5,7 @@
 import type { Element, Point } from "../database/shared/types.js";
 import type { Viewport } from "./types.js";
 import type { BoundingBox } from "./selection.js";
-import {
-	getElementBoundingBox,
-	isPointInBox,
-} from "./selection.js";
+import { getElementBoundingBox, isPointInBox } from "./selection.js";
 
 export type ResizeHandle = "nw" | "ne" | "sw" | "se" | "n" | "s" | "e" | "w";
 
@@ -26,7 +23,11 @@ export function moveElement(element: Element, dx: number, dy: number): Element {
 /**
  * Move multiple elements by the same delta
  */
-export function moveElements(elements: Element[], dx: number, dy: number): Element[] {
+export function moveElements(
+	elements: Element[],
+	dx: number,
+	dy: number,
+): Element[] {
 	return elements.map((el) => moveElement(el, dx, dy));
 }
 
@@ -53,8 +54,14 @@ export function getResizeHandles(
 	const handles = new Map<ResizeHandle, { x: number; y: number }>();
 
 	handles.set("nw", { x: box.x - halfHandle, y: box.y - halfHandle });
-	handles.set("ne", { x: box.x + box.width - halfHandle, y: box.y - halfHandle });
-	handles.set("sw", { x: box.x - halfHandle, y: box.y + box.height - halfHandle });
+	handles.set("ne", {
+		x: box.x + box.width - halfHandle,
+		y: box.y - halfHandle,
+	});
+	handles.set("sw", {
+		x: box.x - halfHandle,
+		y: box.y + box.height - halfHandle,
+	});
 	handles.set("se", {
 		x: box.x + box.width - halfHandle,
 		y: box.y + box.height - halfHandle,

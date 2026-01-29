@@ -19,11 +19,9 @@ interface PanState {
 /**
  * Manages pan tool state and mouse event handlers
  */
-export function usePan({
-	canvasRef,
-	enabled,
-	onPan,
-}: UsePanOptions): { isPanning: boolean } {
+export function usePan({ canvasRef, enabled, onPan }: UsePanOptions): {
+	isPanning: boolean;
+} {
 	const [panState, setPanState] = useState<PanState>({
 		isPanning: false,
 		startX: 0,
