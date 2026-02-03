@@ -1,8 +1,8 @@
 # RFC-001: Independent Element Management (Excalidraw-Style)
 
-**Status:** In Progress (Phase 1-2 Complete)  
+**Status:** In Progress (Phase 1-2 Complete; Phase 4 Complete; Phase 5 In Progress)  
 **Created:** 2026-01-29  
-**Updated:** 2026-01-29  
+**Updated:** 2026-02-03  
 **Author:** AI Assistant  
 
 ---
@@ -82,10 +82,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can adjust individual element dimensions.
 
 **Acceptance Criteria:**
-- [ ] Resize handles appear on selection
-- [ ] Dragging handles resizes only selected elements
-- [ ] Rotation handle allows angle adjustment
-- [ ] Aspect ratio lock (optional) for proportional resize
+- [x] Resize handles appear on selection (single selection)
+- [x] Dragging handles resizes only selected elements
+- [ ] Rotation handle allows angle adjustment (angle is stored, but element rotation is not yet rendered)
+- [x] Aspect ratio lock (optional) for proportional resize (Shift)
 
 ### US-6: Copy/Paste Elements
 **As a** user,  
@@ -93,10 +93,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can duplicate work quickly.
 
 **Acceptance Criteria:**
-- [ ] Ctrl/Cmd+C copies selected elements
-- [ ] Ctrl/Cmd+V pastes as new elements with new IDs
-- [ ] Pasted elements are offset slightly to show distinction
-- [ ] Pasted elements become the new selection
+- [x] Ctrl/Cmd+C copies selected elements
+- [x] Ctrl/Cmd+V pastes as new elements with new IDs
+- [x] Pasted elements are offset slightly to show distinction
+- [x] Pasted elements become the new selection
 
 ### US-7: Z-Index (Layer) Management
 **As a** user,  
@@ -104,10 +104,10 @@ Each element should be a **first-class, independent entity**:
 **So that** I can control which elements appear in front/behind.
 
 **Acceptance Criteria:**
-- [ ] "Bring to Front" moves selected to highest zIndex (Database ready, UI controls needed)
-- [ ] "Send to Back" moves selected to lowest zIndex (Database ready, UI controls needed)
-- [ ] "Bring Forward" / "Send Backward" for incremental changes (Database ready, UI controls needed)
-- [ ] Visual feedback shows layer order changes (Database ready, UI controls needed)
+- [ ] "Bring to Front" moves selected to highest zIndex (utilities exist; UI + shortcuts in progress)
+- [ ] "Send to Back" moves selected to lowest zIndex (utilities exist; UI + shortcuts in progress)
+- [ ] "Bring Forward" / "Send Backward" for incremental changes (utilities exist; UI + shortcuts in progress)
+- [ ] Visual feedback shows layer order changes (render already sorted by zIndex; needs controls)
 
 ---
 
@@ -166,18 +166,18 @@ Looking at [apps/excalidraw/hooks/canvas/use-selection.ts](file:///Users/mac/Web
 - ✅ `handleElementsMove` callback persists moved positions to RxDB
 
 ### Phase 3: Add Transform Handles
-- Implement resize handles on selection bounding box
-- Implement rotation handle
-- Update element dimensions on handle drag
+- ✅ Resize handles on selection bounding box (single selection)
+- ✅ Update element dimensions on handle drag (persisted to RxDB)
+- ⚠️ Rotation handle exists and stores `angle`, but element rotation is not yet rendered (drawing + hit testing)
 
 ### Phase 4: Add Copy/Paste
-- Implement clipboard with element serialization
-- Generate new IDs on paste
-- Position pasted elements with offset
+- ✅ Implement clipboard with element serialization (in-memory)
+- ✅ Generate new IDs on paste
+- ✅ Position pasted elements with offset
 
 ### Phase 5: Add Layer Controls
 - Implement zIndex manipulation utilities
-- Add keyboard shortcuts (Ctrl+], Ctrl+[, etc.)
+- Add keyboard shortcuts (Ctrl/Cmd+], Ctrl/Cmd+[, etc.)
 - Add UI controls in toolbar/context menu
 
 ---
@@ -187,7 +187,7 @@ Looking at [apps/excalidraw/hooks/canvas/use-selection.ts](file:///Users/mac/Web
 - [x] User can select single element without affecting others
 - [x] User can delete single element without affecting others
 - [x] User can move single element without affecting others
-- [ ] User can resize/rotate single element (Phase 3)
+- [ ] User can resize/rotate single element (resize works; rotate rendering pending)
 - [x] Multi-selection works for batch operations
 - [x] Performance: 60fps during drag/transform operations
 

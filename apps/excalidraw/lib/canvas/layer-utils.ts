@@ -135,3 +135,89 @@ export function isAtBack(element: Element, allElements: Element[]): boolean {
   const minZ = getMinZIndex(allElements);
   return element.zIndex === minZ;
 }
+
+/**
+ * Bring the selected element(s) to the front.
+ *
+ * For multi-selection, preserves the relative order within the selection
+ * by sorting selected elements by their current zIndex ascending and assigning
+ * consecutive zIndex values above the current maximum.
+ */
+export function bringSelectionToFront(elements: Element[], selectedIds: Set<string>): Element[] {
+  if (selectedIds.size === 0 || elements.length === 0) return elements;
+
+  const selected = elements
+    .filter((el) => selectedIds.has(el.id))
+    .sort((a, b) => a.zIndex - b.zIndex);
+  if (selected.length === 0) return elements;
+
+  let nextZ = getMaxZIndex(elements) + 1;
+  const zById = new Map<string, number>();
+  for (const el of selected) {
+    zById.set(el.id, nextZ);
+    nextZ += 1;
+  }
+
+  return elements.map((el) => (zById.has(el.id) ? { ...el, zIndex: zById.get(el.id)! } : el));
+}
+
+/**
+ * Send the selected element(s) to the back.
+ *
+ * For multi-selection, preserves the relative order within the selection
+ * by sorting selected elements by their current zIndex ascending and assigning
+ * consecutive zIndex values below the current minimum.
+ */
+export function sendSelectionToBack(elements: Element[], selectedIds: Set<string>): Element[] {
+  if (selectedIds.size === 0 || elements.length === 0) return elements;
+
+  const selected = elements
+    .filter((el) => selectedIds.has(el.id))
+    .sort((a, b) => a.zIndex - b.zIndex);
+  if (selected.length === 0) return elements;
+
+  let nextZ = getMinZIndex(elements) - selected.length;
+  const zById = new Map<string, number>();
+  for (const el of selected) {
+    zById.set(el.id, nextZ);
+    nextZ += 1;
+  }
+
+  return elements.map((el) => (zById.has(el.id) ? { ...el, zIndex: zById.get(el.id)! } : el));
+}
+
+/**
+ * Bring the selected element forward one step.
+ *
+ * Initial scope: only supports single selection.
+ */
+export function bringSelectionForward(elements: Element[], selectedIds: Set<string>): Element[] {
+  if (selectedIds.size !== 1 || elements.length === 0) return elements;
+
+  const selectedId = Array.from(selectedIds)[0];
+  const element = elements.find((el) => el.id === selectedId);
+  if (!element) return elements;
+
+  const newZIndex = bringForwardZIndex(element, elements);
+  if (newZIndex === element.zIndex) return elements;
+
+  return elements.map((el) => (el.id === selectedId ? { ...el, zIndex: newZIndex } : el));
+}
+
+/**
+ * Send the selected element backward one step.
+ *
+ * Initial scope: only supports single selection.
+ */
+export function sendSelectionBackward(elements: Element[], selectedIds: Set<string>): Element[] {
+  if (selectedIds.size !== 1 || elements.length === 0) return elements;
+
+  const selectedId = Array.from(selectedIds)[0];
+  const element = elements.find((el) => el.id === selectedId);
+  if (!element) return elements;
+
+  const newZIndex = sendBackwardZIndex(element, elements);
+  if (newZIndex === element.zIndex) return elements;
+
+  return elements.map((el) => (el.id === selectedId ? { ...el, zIndex: newZIndex } : el));
+}

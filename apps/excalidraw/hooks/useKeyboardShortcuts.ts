@@ -13,6 +13,10 @@ interface KeyboardShortcutsOptions {
   onCopy?: () => void;
   onPaste?: () => void;
   onDuplicate?: () => void;
+  onBringToFront?: () => void;
+  onSendToBack?: () => void;
+  onBringForward?: () => void;
+  onSendBackward?: () => void;
   onDeleteSelected?: () => void;
   onClearSelection?: () => void;
   selectedIds: Set<string>;
@@ -29,6 +33,10 @@ export function useKeyboardShortcuts({
   onCopy,
   onPaste,
   onDuplicate,
+  onBringToFront,
+  onSendToBack,
+  onBringForward,
+  onSendBackward,
   onDeleteSelected,
   onClearSelection,
   selectedIds,
@@ -102,6 +110,38 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // Layer shortcuts (z-index)
+      // Note: Depending on keyboard layout, Shift+[/] may report "{" / "}" as e.key.
+      const isMod = e.ctrlKey || e.metaKey;
+      const isRightBracket = e.key === "]" || e.key === "}";
+      const isLeftBracket = e.key === "[" || e.key === "{";
+
+      if (isMod && isRightBracket) {
+        if (e.shiftKey && selectedIds.size > 0) {
+          e.preventDefault();
+          onBringToFront?.();
+          return;
+        }
+        if (!e.shiftKey && selectedIds.size === 1) {
+          e.preventDefault();
+          onBringForward?.();
+          return;
+        }
+      }
+
+      if (isMod && isLeftBracket) {
+        if (e.shiftKey && selectedIds.size > 0) {
+          e.preventDefault();
+          onSendToBack?.();
+          return;
+        }
+        if (!e.shiftKey && selectedIds.size === 1) {
+          e.preventDefault();
+          onSendBackward?.();
+          return;
+        }
+      }
+
       // Copy selected  elements
       if ((e.ctrlKey || e.metaKey) && e.key === "c" && selectedIds.size > 0) {
         e.preventDefault();
@@ -171,6 +211,10 @@ export function useKeyboardShortcuts({
     onCopy,
     onPaste,
     onDuplicate,
+    onBringToFront,
+    onSendToBack,
+    onBringForward,
+    onSendBackward,
     onDeleteSelected,
     onClearSelection,
     selectedIds,

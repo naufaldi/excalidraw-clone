@@ -17,7 +17,13 @@ import { useKeyboardShortcuts } from "#hooks/useKeyboardShortcuts.js";
 import type { Element } from "#lib/database/shared/types.js";
 import type { Route } from "./+types/page";
 import { clipboardManager } from "#lib/clipboard/clipboard-manager.js";
-import { generateElementId } from "#lib/canvas/index.js";
+import {
+  bringSelectionForward,
+  bringSelectionToFront,
+  generateElementId,
+  sendSelectionToBack,
+  sendSelectionBackward,
+} from "#lib/canvas/index.js";
 
 export function meta(_props: Route.MetaArgs) {
   return [
@@ -154,6 +160,65 @@ export default function Page() {
     }
   }, []);
 
+  // Layer (zIndex) handlers
+  const handleBringToFront = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    const next = bringSelectionToFront(elements, selectedIds);
+    const updates = next
+      .filter((el) => selectedIds.has(el.id))
+      .map((el) => ({ id: el.id, updates: { zIndex: el.zIndex } }));
+    if (updates.length === 0) return;
+    try {
+      await updateMultipleElementsInBoard(DEFAULT_BOARD_ID, updates);
+    } catch (err) {
+      console.error("Failed to bring to front:", err);
+    }
+  }, [elements, selectedIds]);
+
+  const handleSendToBack = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    const next = sendSelectionToBack(elements, selectedIds);
+    const updates = next
+      .filter((el) => selectedIds.has(el.id))
+      .map((el) => ({ id: el.id, updates: { zIndex: el.zIndex } }));
+    if (updates.length === 0) return;
+    try {
+      await updateMultipleElementsInBoard(DEFAULT_BOARD_ID, updates);
+    } catch (err) {
+      console.error("Failed to send to back:", err);
+    }
+  }, [elements, selectedIds]);
+
+  const handleBringForward = useCallback(async () => {
+    if (selectedIds.size !== 1) return;
+    const next = bringSelectionForward(elements, selectedIds);
+    const selectedId = Array.from(selectedIds)[0];
+    const updated = next.find((el) => el.id === selectedId);
+    if (!updated) return;
+    try {
+      await updateMultipleElementsInBoard(DEFAULT_BOARD_ID, [
+        { id: updated.id, updates: { zIndex: updated.zIndex } },
+      ]);
+    } catch (err) {
+      console.error("Failed to bring forward:", err);
+    }
+  }, [elements, selectedIds]);
+
+  const handleSendBackward = useCallback(async () => {
+    if (selectedIds.size !== 1) return;
+    const next = sendSelectionBackward(elements, selectedIds);
+    const selectedId = Array.from(selectedIds)[0];
+    const updated = next.find((el) => el.id === selectedId);
+    if (!updated) return;
+    try {
+      await updateMultipleElementsInBoard(DEFAULT_BOARD_ID, [
+        { id: updated.id, updates: { zIndex: updated.zIndex } },
+      ]);
+    } catch (err) {
+      console.error("Failed to send backward:", err);
+    }
+  }, [elements, selectedIds]);
+
   // Copy/Paste/Duplicate handlers
   const handleCopy = useCallback(() => {
     if (selectedIds.size === 0) return;
@@ -253,6 +318,10 @@ export default function Page() {
     onCopy: handleCopy,
     onPaste: handlePaste,
     onDuplicate: handleDuplicate,
+    onBringToFront: handleBringToFront,
+    onSendToBack: handleSendToBack,
+    onBringForward: handleBringForward,
+    onSendBackward: handleSendBackward,
     onDeleteSelected: handleDeleteSelected,
     onClearSelection: handleClearSelection,
     selectedIds,
@@ -314,6 +383,86 @@ export default function Page() {
           onFillColorChange={setFillColor}
           orientation="horizontal"
         />
+        {/* Layer controls (visible when selection is non-empty) */}
+        {selectedIds.size > 0 ? (
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              alignItems: "center",
+              padding: "8px 10px",
+              borderRadius: 8,
+              border: "1px solid var(--border)",
+              background: "var(--background)",
+            }}
+          >
+            <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>Layer</span>
+            <button
+              type="button"
+              onClick={handleBringToFront}
+              title="Bring to Front (Ctrl/Cmd+Shift+])"
+              style={{
+                fontSize: 12,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                background: "var(--background)",
+                cursor: "pointer",
+              }}
+            >
+              Front
+            </button>
+            <button
+              type="button"
+              onClick={handleBringForward}
+              title="Bring Forward (Ctrl/Cmd+])"
+              disabled={selectedIds.size !== 1}
+              style={{
+                fontSize: 12,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                background: "var(--background)",
+                cursor: selectedIds.size === 1 ? "pointer" : "not-allowed",
+                opacity: selectedIds.size === 1 ? 1 : 0.5,
+              }}
+            >
+              Forward
+            </button>
+            <button
+              type="button"
+              onClick={handleSendBackward}
+              title="Send Backward (Ctrl/Cmd+[)"
+              disabled={selectedIds.size !== 1}
+              style={{
+                fontSize: 12,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                background: "var(--background)",
+                cursor: selectedIds.size === 1 ? "pointer" : "not-allowed",
+                opacity: selectedIds.size === 1 ? 1 : 0.5,
+              }}
+            >
+              Backward
+            </button>
+            <button
+              type="button"
+              onClick={handleSendToBack}
+              title="Send to Back (Ctrl/Cmd+Shift+[)"
+              style={{
+                fontSize: 12,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                background: "var(--background)",
+                cursor: "pointer",
+              }}
+            >
+              Back
+            </button>
+          </div>
+        ) : null}
         {/* Save status indicator */}
         <div
           style={{
